@@ -21,10 +21,10 @@
   width: 100%; height: 100%;
   object-fit: contain;
   display: block;
-  animation: spin 8s linear infinite;
   user-select: none;
 }
-.hovering .star { animation-duration: 1.2s; }
+/* Solo gira al pasar por un link/botón */
+.hovering .star { animation: spin 1.2s linear infinite; }
 
 @keyframes spin {
   from { transform: rotate(0deg); }
