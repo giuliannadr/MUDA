@@ -10,10 +10,9 @@ almacenamiento de imágenes (Cloudinary), con el código común en una sola fuen
 ```
 MUDA/
 ├── src/            # Sitio público (Vite + React + TS, CSS Modules)   → puerto 3000
+│   └── lib/        #   cliente Supabase + tipos + helpers de Cloudinary
 ├── admin/          # Panel de administración (Vite + React + Tailwind) → puerto 3001
-├── shared/         # Fuente ÚNICA del código común (no duplicar)
-│   ├── supabase.ts #   cliente + tipos (Talento, Solicitud, Categoria)
-│   └── cloudinary.ts #  helpers de imágenes (imgUrl, uploadImage)
+│   └── src/lib/    #   misma capa (supabase.ts, cloudinary.ts)
 ├── supabase/       # Scripts SQL del esquema (ejecutar en el editor de Supabase)
 └── ...
 ```
@@ -24,9 +23,13 @@ Es intencional y por **seguridad**: el código y la lógica del admin nunca se
 envían al navegador de los visitantes del sitio público, y cada app se despliega
 por separado (el admin detrás de login, en una URL privada).
 
-Para evitar duplicar el cliente de Supabase, los tipos y los helpers de
-Cloudinary, ambas apps **re-exportan** desde `shared/` (`src/lib/*` y
-`admin/src/lib/*` son solo re-exports). Así hay una sola fuente de verdad.
+Cada app es **autocontenida** (tiene su propio `src/lib` con el cliente de
+Supabase, los tipos y los helpers de Cloudinary). Se mantienen en sync a mano
+porque comparten el mismo esquema de base de datos. Se eligió así —en vez de un
+paquete compartido— para que cada app despliegue de forma independiente y simple
+en Vercel (Root Directory por proyecto), sin imports cruzados que compliquen el
+build. Si en el futuro se quisiera una única fuente de verdad, el camino correcto
+sería un monorepo con workspaces (npm/pnpm) y `shared` como paquete instalado.
 
 ## Requisitos
 
