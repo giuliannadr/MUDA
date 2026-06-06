@@ -88,7 +88,16 @@
   width: 100%;
   max-width: 420px; /* el libro no supera 1 página → siempre vertical (sin hoja en blanco) */
 }
-.book { touch-action: pan-y; }
+/* cuerpo del libro opaco: al pasar la hoja no se ve el fondo a través */
+.book {
+  touch-action: pan-y;
+  background: var(--cream);
+  box-shadow: 0 26px 60px rgba(0,0,0,0.4);
+}
+/* fuerza opacidad de las hojas internas que genera react-pageflip */
+.book :global(.stf__item),
+.book :global(.stf__block) { background: var(--cream); }
+.book :global(.stf__item) { backface-visibility: hidden; }
 
 /* controles */
 .controls {
