@@ -59,7 +59,7 @@
   align-items: center;
   gap: clamp(1.2rem, 3vw, 2rem);
   width: 100%;
-  max-width: 960px; /* doble página en desktop, con márgenes */
+  max-width: 800px; /* doble página en desktop, con márgenes a los lados */
 }
 .book { touch-action: pan-y; }
 /* cada hoja es opaca (al doblarse no se ve nada a través) */

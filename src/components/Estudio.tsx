@@ -49,13 +49,13 @@ export default function Estudio() {
       <div className={styles.bookWrap}>
         <FlipBook
           ref={book}
-          width={440}
-          height={600}
+          width={400}
+          height={560}
           size="stretch"
-          minWidth={300}
-          maxWidth={460}
-          minHeight={420}
-          maxHeight={650}
+          minWidth={280}
+          maxWidth={400}
+          minHeight={380}
+          maxHeight={560}
           usePortrait
           drawShadow
           maxShadowOpacity={0.4}
