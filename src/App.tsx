@@ -16,9 +16,18 @@ import './App.css'
 
 export type View = 'inicio' | 'quienes' | 'produccion' | 'foto-video' | 'direccion-creativa' | 'contenido-redes' | 'eventos' | 'agencia' | 'estudio' | 'contacto' | 'sumate'
 
+const ALL_VIEWS: View[] = ['inicio', 'quienes', 'produccion', 'foto-video', 'direccion-creativa', 'contenido-redes', 'eventos', 'agencia', 'estudio', 'contacto', 'sumate']
+
+// Lee la sección desde la URL (#estudio, #agencia, etc.)
+const viewFromHash = (): View => {
+  const h = window.location.hash.replace('#', '') as View
+  return ALL_VIEWS.includes(h) ? h : 'inicio'
+}
+
 export default function App() {
-  const [current, setCurrent] = useState<View>('inicio')
-  const [displayed, setDisplayed] = useState<View>('inicio')
+  const initial = viewFromHash()
+  const [current, setCurrent] = useState<View>(initial)
+  const [displayed, setDisplayed] = useState<View>(initial)
   const [animating, setAnimating] = useState(false)
   const [curtainOpen, setCurtainOpen] = useState(false)
   const mainRef = useRef<HTMLDivElement>(null)
@@ -31,6 +40,9 @@ export default function App() {
       homeScroll.current = mainRef.current.scrollTop
     }
     setAnimating(true)
+    // Reflejar la sección en la URL para que al recargar se mantenga
+    if (view === 'inicio') window.history.pushState(null, '', window.location.pathname)
+    else window.history.pushState(null, '', `#${view}`)
     setTimeout(() => {
       setDisplayed(view)
       setCurrent(view)
@@ -42,6 +54,18 @@ export default function App() {
       setAnimating(false)
     }, 300)
   }
+
+  // Botón atrás/adelante del navegador → cambiar de sección
+  useEffect(() => {
+    const onPop = () => {
+      const v = viewFromHash()
+      setCurrent(v)
+      setDisplayed(v)
+      requestAnimationFrame(() => mainRef.current?.scrollTo({ top: 0 }))
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
 
   useEffect(() => {
     const timer = setTimeout(() => {
