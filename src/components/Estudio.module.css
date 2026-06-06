@@ -323,18 +323,18 @@
   width: clamp(42px, 4.5vw, 50px);
   height: clamp(42px, 4.5vw, 50px);
   border-radius: 50%;
-  border: 1px solid rgba(240,234,216,0.3);
-  background: rgba(240,234,216,0.04);
-  color: var(--cream);
+  border: 1px solid rgba(10,9,8,0.2);
+  background: transparent;
+  color: var(--burgundy);
   font-size: 1.1rem;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: background 0.3s, transform 0.3s, border-color 0.3s, opacity 0.3s;
+  transition: background 0.3s, transform 0.3s, border-color 0.3s, opacity 0.3s, color 0.3s;
 }
 .nav:hover {
-  background: var(--cream);
-  color: var(--burgundy);
-  border-color: var(--cream);
+  background: var(--burgundy);
+  color: var(--cream);
+  border-color: var(--burgundy);
   transform: scale(1.06);
 }
 /* flecha oculta cuando no se puede pasar más (mantiene el espacio) */
@@ -349,7 +349,7 @@
   font-family: var(--f-mono);
   font-size: 0.62rem;
   letter-spacing: 0.18em;
-  color: rgba(240,234,216,0.6);
+  color: rgba(10,9,8,0.55);
 }
 
 /* ── responsive: en mobile/tablet la revista pasa a página simple vertical ── */
