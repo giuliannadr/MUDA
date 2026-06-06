@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import styles from './Estudio.module.css'
 import { imgUrl } from '../lib/cloudinary'
+import { estudioFotos } from '../lib/estudioFotos'
 
 const features = [
   { title: 'Sala Infinito', desc: 'Sala principal tipo infinito de cuatro paredes. Ideal para sesiones de fotos, campañas de moda, creación de contenido y producciones comerciales.' },
@@ -9,58 +11,98 @@ const features = [
   { title: 'Servicios add-on', desc: 'Posibilidad de sumar maquilladora y fotógrafe profesional, a criterio y preferencia de cada cliente.' },
 ]
 
-/* Galería del estudio — las fotos viven en Cloudinary (no ocupan espacio en el repo).
-   Para cambiar/agregar fotos: subí cada imagen a Cloudinary dentro de la carpeta
-   "estudio" con el nombre (public_id) que figura en cada 'id' de abajo.
-   Cloudinary las optimiza y sirve por CDN automáticamente.
-   - shape 'tall'  → ocupa alto doble (foto vertical / hero)
-   - shape 'wide'  → ocupa ancho completo (foto apaisada)
-   - sin shape     → celda cuadrada normal */
-const photos: { id: string; label: string; shape?: 'tall' | 'wide' }[] = [
-  { id: 'espacio1_wmgx1f',  label: 'Sala Infinito', shape: 'tall' },
-  { id: 'espacio2_b7rpbk',  label: 'El set' },
-  { id: 'espacio3_wiwpo3',  label: 'El espacio' },
-  { id: 'espacio4_xggrbc',  label: 'Estudio' },
-  { id: 'espacio66_rbymzi', label: 'Palermo' },
-  { id: 'espacio5_fqt5ug',  label: 'Vista general', shape: 'wide' },
-]
+const N = estudioFotos.length
+const pad = (n: number) => String(n).padStart(2, '0')
 
 export default function Estudio() {
-  const visualRef = useRef<HTMLDivElement>(null)
-  const gridRef   = useRef<HTMLDivElement>(null)
-  const [broken, setBroken] = useState<Record<string, boolean>>({})
+  const [active, setActive] = useState(0)
+  const [lightbox, setLightbox] = useState(false)
 
-  const onMove = (e: React.MouseEvent) => {
-    const vis = visualRef.current
-    const grid = gridRef.current
-    if (!vis || !grid) return
-    const r = vis.getBoundingClientRect()
-    const x = ((e.clientX - r.left) / r.width  - 0.5) * 8
-    const y = ((e.clientY - r.top)  / r.height - 0.5) * 8
-    grid.style.transition = 'transform 0.15s linear'
-    grid.style.transform = `perspective(1100px) rotateY(${x}deg) rotateX(${-y}deg)`
-  }
+  const go = useCallback((dir: number) => {
+    setActive(a => (a + dir + N) % N)
+  }, [])
 
-  const onLeave = () => {
-    if (!gridRef.current) return
-    gridRef.current.style.transition = 'transform 0.9s cubic-bezier(0.16,1,0.3,1)'
-    gridRef.current.style.transform = 'perspective(1100px) rotateY(0deg) rotateX(0deg)'
-  }
+  useEffect(() => {
+    document.body.style.overflow = lightbox ? 'hidden' : ''
+    const onKey = (e: KeyboardEvent) => {
+      if (!lightbox) return
+      if (e.key === 'Escape') setLightbox(false)
+      if (e.key === 'ArrowRight') go(1)
+      if (e.key === 'ArrowLeft') go(-1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
+  }, [lightbox, go])
+
+  const cur = estudioFotos[active]
 
   return (
-    <section className={styles.section} data-nav="light">
-      <div className={styles.layout}>
-        <div className={styles.content}>
-          <p className="section-label reveal">☆ Estudio</p>
-          <h2 className={`${styles.heading} reveal`}>
-            El espacio<br />donde todo<br /><em>cobra vida.</em>
-          </h2>
-          <p className={`${styles.location} reveal`}>Palermo, Buenos Aires</p>
-          <p className={`${styles.desc} reveal d1`}>
-            En MUDA contamos con un espacio en Palermo pensado para la realización de
-            producciones fotográficas, audiovisuales y proyectos creativos de todo tipo.
-          </p>
-          <div className={`${styles.features} reveal d2`}>
+    <section className={styles.section} data-nav="dark">
+      {/* ── HERO cinematográfico ── */}
+      <div className={styles.hero}>
+        <img
+          src={imgUrl(estudioFotos[0].id, 'w_2200,h_1240,c_fill,g_auto,q_auto,f_auto')}
+          alt="Estudio MUDA — Palermo, Buenos Aires"
+          className={styles.heroImg}
+        />
+        <div className={styles.heroOverlay} />
+        <div className={styles.heroContent}>
+          <p className={`${styles.heroKicker} reveal`}>☆ Estudio</p>
+          <h2 className={`${styles.heroH} reveal d1`}>El espacio donde<br />todo <em>cobra vida.</em></h2>
+          <p className={`${styles.heroLoc} reveal d2`}>Palermo · Buenos Aires</p>
+        </div>
+        <div className={styles.heroBadge}>{pad(N)} espacios</div>
+      </div>
+
+      {/* ── GALERÍA: visor grande + miniaturas ── */}
+      <div className={styles.galleryWrap}>
+        <p className={styles.intro}>
+          En MUDA contamos con un espacio en Palermo pensado para producciones
+          fotográficas, audiovisuales y proyectos creativos de todo tipo.
+        </p>
+
+        <div className={styles.viewer}>
+          <button className={`${styles.nav} ${styles.navL}`} onClick={() => go(-1)} aria-label="Anterior">←</button>
+
+          <div className={styles.stage} onClick={() => setLightbox(true)}>
+            {estudioFotos.map((p, i) => (
+              <img
+                key={p.id}
+                src={imgUrl(p.id, 'w_1600,h_1040,c_fill,g_auto,q_auto,f_auto')}
+                alt={p.label}
+                className={`${styles.stageImg} ${i === active ? styles.on : ''}`}
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
+            ))}
+            <div className={styles.stageBar}>
+              <span className={styles.stageLabel}>{cur.label}</span>
+              <span className={styles.stageCount}>{pad(active + 1)} / {pad(N)}</span>
+            </div>
+            <span className={styles.expand}>⤢ Ampliar</span>
+          </div>
+
+          <button className={`${styles.nav} ${styles.navR}`} onClick={() => go(1)} aria-label="Siguiente">→</button>
+        </div>
+
+        <div className={styles.thumbs}>
+          {estudioFotos.map((p, i) => (
+            <button
+              key={p.id}
+              className={`${styles.thumb} ${i === active ? styles.thumbOn : ''}`}
+              onClick={() => setActive(i)}
+              aria-label={p.label}
+            >
+              <img src={imgUrl(p.id, 'w_300,h_300,c_fill,g_auto,q_auto,f_auto')} alt={p.label} loading="lazy" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── FEATURES (banda bordó) ── */}
+      <div className={styles.featuresWrap}>
+        <div className={styles.featuresInner}>
+          <h3 className={styles.featuresH}>Todo lo que incluye<br /><em>el espacio.</em></h3>
+          <div className={styles.features}>
             {features.map(f => (
               <div key={f.title} className={styles.feature}>
                 <p className={styles.featureTitle}>{f.title}</p>
@@ -69,40 +111,24 @@ export default function Estudio() {
             ))}
           </div>
         </div>
-
-        <div ref={visualRef} className={styles.visual} onMouseMove={onMove} onMouseLeave={onLeave}>
-          <div ref={gridRef} className={`${styles.gallery} reveal`}>
-            {photos.map((p, i) => {
-              const opts =
-                p.shape === 'tall' ? 'w_640,h_900,c_fill,q_auto,f_auto'
-              : p.shape === 'wide' ? 'w_900,h_460,c_fill,q_auto,f_auto'
-              :                      'w_560,h_560,c_fill,q_auto,f_auto'
-              return (
-                <figure
-                  key={p.id}
-                  className={[
-                    styles.cell,
-                    p.shape === 'tall' ? styles.tall : '',
-                    p.shape === 'wide' ? styles.wide : '',
-                    broken[p.id] ? styles.empty : '',
-                  ].join(' ')}
-                  style={{ ['--d' as string]: `${i * 70}ms` }}
-                >
-                  <img
-                    src={imgUrl(p.id, opts)}
-                    alt={`Estudio MUDA — ${p.label}`}
-                    loading="lazy"
-                    className={styles.cellImg}
-                    onError={() => setBroken(b => ({ ...b, [p.id]: true }))}
-                  />
-                  <figcaption className={styles.cellLabel}>{p.label}</figcaption>
-                </figure>
-              )
-            })}
-          </div>
-          <p className={`${styles.note} reveal d2`}>Estudio Palermo · Buenos Aires</p>
-        </div>
       </div>
+
+      {/* ── LIGHTBOX (portal a body para escapar el transform de la página) ── */}
+      {lightbox && createPortal(
+        <div className={styles.lightbox} onClick={() => setLightbox(false)}>
+          <button className={styles.lbClose} onClick={() => setLightbox(false)} aria-label="Cerrar">✕</button>
+          <button className={`${styles.lbNav} ${styles.lbL}`} onClick={e => { e.stopPropagation(); go(-1) }} aria-label="Anterior">←</button>
+          <img
+            src={imgUrl(cur.id, 'w_1900,q_auto,f_auto')}
+            alt={cur.label}
+            className={styles.lbImg}
+            onClick={e => e.stopPropagation()}
+          />
+          <button className={`${styles.lbNav} ${styles.lbR}`} onClick={e => { e.stopPropagation(); go(1) }} aria-label="Siguiente">→</button>
+          <div className={styles.lbCaption}>{cur.label} · {pad(active + 1)} / {pad(N)}</div>
+        </div>,
+        document.body
+      )}
     </section>
   )
 }

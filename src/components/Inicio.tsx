@@ -285,10 +285,19 @@ export default function Inicio({ navigate, onCurtainChange }: Props) {
             <button className={styles.ghostBtnCream} onClick={() => navigate('estudio')}>Ver estudio →</button>
           </div>
           <div className={styles.estudioFotos}>
-            <div className={styles.estudioMain}><span className={styles.photoTagLight}>Sala Infinito</span></div>
+            <div className={styles.estudioMain} onClick={() => navigate('estudio')}>
+              <img src={imgUrl('espacio5_fqt5ug', 'w_1300,h_900,c_fill,g_auto,q_auto,f_auto')} alt="Estudio MUDA — Sala Infinito" className={styles.estudioImg} loading="lazy" />
+              <span className={styles.photoTagLight}>Sala Infinito</span>
+            </div>
             <div className={styles.estudioGrid}>
-              <div className={styles.estudioSm}><span className={styles.photoTagLight}>Sala 2</span></div>
-              <div className={styles.estudioSm}><span className={styles.photoTagLight}>Sala 3</span></div>
+              <div className={styles.estudioSm} onClick={() => navigate('estudio')}>
+                <img src={imgUrl('espacio1_wmgx1f', 'w_760,h_570,c_fill,g_auto,q_auto,f_auto')} alt="Estudio MUDA" className={styles.estudioImg} loading="lazy" />
+                <span className={styles.photoTagLight}>El set</span>
+              </div>
+              <div className={styles.estudioSm} onClick={() => navigate('estudio')}>
+                <img src={imgUrl('espacio2_b7rpbk', 'w_760,h_570,c_fill,g_auto,q_auto,f_auto')} alt="Estudio MUDA" className={styles.estudioImg} loading="lazy" />
+                <span className={styles.photoTagLight}>Palermo</span>
+              </div>
             </div>
           </div>
         </section>

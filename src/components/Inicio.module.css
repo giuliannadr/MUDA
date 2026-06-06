@@ -148,7 +148,9 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--cream);
-  opacity: 0.35;
+  opacity: 0.9;
+  position: relative;
+  z-index: 2;
 }
 
 /* ══ MARQUEE — vino ═══════════════════════════════════════ */
@@ -776,12 +778,15 @@
 }
 
 .estudioMain {
+  position: relative;
   flex: 1;
   min-height: 55%;
-  background: linear-gradient(160deg, #c4b8a8 0%, #8a7868 100%);
+  overflow: hidden;
+  background: #14100e;
   display: flex;
   align-items: flex-end;
   padding: 1.5rem;
+  cursor: pointer;
 }
 
 .estudioGrid {
@@ -791,11 +796,34 @@
 }
 
 .estudioSm {
+  position: relative;
   aspect-ratio: 4/3;
-  background: linear-gradient(160deg, #b0a090 0%, #7a6858 100%);
+  overflow: hidden;
+  background: #14100e;
   display: flex;
   align-items: flex-end;
   padding: 0.9rem;
+  cursor: pointer;
+}
+
+/* foto que llena la celda */
+.estudioImg {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.16,1,0.3,1), filter 0.5s;
+}
+.estudioMain:hover .estudioImg,
+.estudioSm:hover .estudioImg { transform: scale(1.05); filter: brightness(1.05); }
+/* degradé para que la etiqueta se lea sobre la foto */
+.estudioMain::after,
+.estudioSm::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10,9,8,0.5), transparent 45%);
+  pointer-events: none;
 }
 
 /* ══ CONTACTO — blanco, tipo grande ════════════════════════ */
