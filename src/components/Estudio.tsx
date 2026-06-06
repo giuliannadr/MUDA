@@ -16,7 +16,7 @@ const features = [
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-// los tipos de react-pageflip marcan todas las props como requeridas; lo usamos laxo
+// react-pageflip marca todas las props como requeridas; lo usamos laxo
 const FlipBook = HTMLFlipBook as unknown as React.ComponentType<any>
 
 export default function Estudio() {
@@ -30,60 +30,57 @@ export default function Estudio() {
     dir > 0 ? pf.flipNext() : pf.flipPrev()
   }
 
-  // páginas de foto (después de portada + intro)
   const fotoPages = estudioFotos.slice(1) // 5 fotos interiores
-
-  const totalPages = total || 9
+  const totalPages = total || 10
   const atStart = page <= 0
   const atEnd = page >= totalPages - 1
 
   return (
     <section className={styles.section} data-nav="dark">
-      <div className={styles.stage}>
-        <aside className={styles.aside}>
-          <p className={`${styles.kicker} reveal`}>☆ Estudio</p>
-          <h2 className={`${styles.title} reveal d1`}>La <em>revista</em><br />del espacio.</h2>
-          <p className={`${styles.lead} reveal d2`}>
-            Nuestro espacio en Palermo, contado hoja por hoja.
-          </p>
-          <p className={`${styles.hint} reveal d2`}>↗ Arrastrá la esquina o usá las flechas</p>
-          <span className={styles.metaNo}>Nº 01 · Palermo</span>
-        </aside>
+      <div className={styles.bookWrap}>
+        <FlipBook
+          ref={book}
+          width={440}
+          height={600}
+          size="stretch"
+          minWidth={300}
+          maxWidth={460}
+          minHeight={420}
+          maxHeight={650}
+          usePortrait
+          drawShadow
+          maxShadowOpacity={0.4}
+          flippingTime={750}
+          mobileScrollSupport
+          className={styles.book}
+          onFlip={(e: any) => setPage(e.data)}
+          onInit={(e: any) => setTotal(e.object?.getPageCount?.() ?? 0)}
+        >
+          {/* p0 — TÍTULO (página de papel) */}
+          <div className={`${styles.page} ${styles.paper} ${styles.titlePage}`}>
+            <div className={styles.titleInner}>
+              <p className={styles.tpKicker}>☆ Estudio</p>
+              <h2 className={styles.tpTitle}>La <em>revista</em><br />del espacio.</h2>
+              <p className={styles.tpLead}>Nuestro espacio en Palermo, contado hoja por hoja.</p>
+              <p className={styles.tpHint}>↗ Arrastrá la esquina o usá las flechas</p>
+              <span className={styles.tpMeta}>Nº 01 · Palermo, Buenos Aires</span>
+            </div>
+          </div>
 
-        <div className={styles.bookCol}>
-          <FlipBook
-            ref={book}
-            width={400}
-            height={540}
-            size="stretch"
-            minWidth={260}
-            maxWidth={420}
-            minHeight={360}
-            maxHeight={580}
-            showCover
-            usePortrait
-            drawShadow
-            maxShadowOpacity={0.35}
-            flippingTime={750}
-            mobileScrollSupport
-            className={styles.book}
-            onFlip={(e: any) => setPage(e.data)}
-            onInit={(e: any) => setTotal(e.object?.getPageCount?.() ?? 0)}
-          >
-          {/* ── PORTADA ── */}
-          <div className={`${styles.page} ${styles.cover}`} data-density="hard">
+          {/* p1 — HERO / portada de la nota */}
+          <div className={`${styles.page} ${styles.cover}`}>
             <img src={pic(estudioFotos[0].id)} className={styles.coverImg} alt="" />
             <div className={styles.coverShade} />
             <div className={styles.coverInner}>
               <p className={styles.mast}>MUDA</p>
               <div className={styles.coverBottom}>
                 <h3 className={styles.coverTitle}>El<br /><em>Estudio</em></h3>
-                <p className={styles.coverSub}>Nº 01 — Palermo, Buenos Aires</p>
+                <p className={styles.coverSub}>Palermo, Buenos Aires</p>
               </div>
             </div>
           </div>
 
-          {/* ── INTRO (texto) ── */}
+          {/* p2 — INTRO (papel) */}
           <div className={`${styles.page} ${styles.paper}`}>
             <div className={styles.paperInner}>
               <p className={styles.section_n}>El espacio</p>
@@ -100,19 +97,18 @@ export default function Estudio() {
             <span className={styles.folio}>02</span>
           </div>
 
-          {/* ── FOTO 1 ── */}
+          {/* p3 */}
           <div className={`${styles.page} ${styles.photoPage}`}>
             <img src={pic(fotoPages[0].id)} className={styles.pageImg} alt={fotoPages[0].label} />
             <span className={styles.cap}>{fotoPages[0].label}</span>
           </div>
-
-          {/* ── FOTO 2 ── */}
+          {/* p4 */}
           <div className={`${styles.page} ${styles.photoPage}`}>
             <img src={pic(fotoPages[1].id)} className={styles.pageImg} alt={fotoPages[1].label} />
             <span className={styles.cap}>{fotoPages[1].label}</span>
           </div>
 
-          {/* ── FEATURES (texto) ── */}
+          {/* p5 — FEATURES (papel) */}
           <div className={`${styles.page} ${styles.paper}`}>
             <div className={styles.paperInner}>
               <p className={styles.section_n}>Lo que incluye</p>
@@ -128,26 +124,24 @@ export default function Estudio() {
             <span className={styles.folio}>05</span>
           </div>
 
-          {/* ── FOTO 3 ── */}
+          {/* p6 */}
           <div className={`${styles.page} ${styles.photoPage}`}>
             <img src={pic(fotoPages[2].id)} className={styles.pageImg} alt={fotoPages[2].label} />
             <span className={styles.cap}>{fotoPages[2].label}</span>
           </div>
-
-          {/* ── FOTO 4 ── */}
+          {/* p7 */}
           <div className={`${styles.page} ${styles.photoPage}`}>
             <img src={pic(fotoPages[3].id)} className={styles.pageImg} alt={fotoPages[3].label} />
             <span className={styles.cap}>{fotoPages[3].label}</span>
           </div>
-
-          {/* ── FOTO 5 ── */}
+          {/* p8 */}
           <div className={`${styles.page} ${styles.photoPage}`}>
             <img src={pic(fotoPages[4].id)} className={styles.pageImg} alt={fotoPages[4].label} />
             <span className={styles.cap}>{fotoPages[4].label}</span>
           </div>
 
-          {/* ── CONTRATAPA ── */}
-          <div className={`${styles.page} ${styles.cover} ${styles.back}`} data-density="hard">
+          {/* p9 — CONTRATAPA */}
+          <div className={`${styles.page} ${styles.cover} ${styles.back}`}>
             <div className={styles.backInner}>
               <p className={styles.mast}>MUDA</p>
               <h3 className={styles.backTitle}>¿Reservás<br />tu <em>producción?</em></h3>
@@ -155,21 +149,20 @@ export default function Estudio() {
               <p className={styles.backTag}>@muda.agcy</p>
             </div>
           </div>
-          </FlipBook>
+        </FlipBook>
 
-          <div className={styles.controls}>
-            <button
-              className={`${styles.nav} ${atStart ? styles.navHidden : ''}`}
-              onClick={() => flip(-1)}
-              aria-label="Anterior"
-            >←</button>
-            <span className={styles.counter}>{pad(Math.min(page + 1, totalPages))} / {pad(totalPages)}</span>
-            <button
-              className={`${styles.nav} ${atEnd ? styles.navHidden : ''}`}
-              onClick={() => flip(1)}
-              aria-label="Siguiente"
-            >→</button>
-          </div>
+        <div className={styles.controls}>
+          <button
+            className={`${styles.nav} ${atStart ? styles.navHidden : ''}`}
+            onClick={() => flip(-1)}
+            aria-label="Anterior"
+          >←</button>
+          <span className={styles.counter}>{pad(Math.min(page + 1, totalPages))} / {pad(totalPages)}</span>
+          <button
+            className={`${styles.nav} ${atEnd ? styles.navHidden : ''}`}
+            onClick={() => flip(1)}
+            aria-label="Siguiente"
+          >→</button>
         </div>
       </div>
     </section>
