@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './Estudio.module.css'
 import { imgUrl } from '../lib/cloudinary'
-import { estudioFotos } from '../lib/estudioFotos'
+import { estudioFotos, ESTUDIO_FX } from '../lib/estudioFotos'
 
 const features = [
   { title: 'Sala Infinito', desc: 'Sala principal tipo infinito de cuatro paredes. Ideal para sesiones de fotos, campañas de moda, creación de contenido y producciones comerciales.' },
@@ -41,7 +41,7 @@ export default function Estudio() {
       {/* ── HERO cinematográfico ── */}
       <div className={styles.hero}>
         <img
-          src={imgUrl(estudioFotos[0].id, 'w_2200,h_1240,c_fill,g_auto,q_auto,f_auto')}
+          src={imgUrl(estudioFotos[0].id, `${ESTUDIO_FX},w_2200,h_1240,c_fill,g_auto,q_auto,f_auto`)}
           alt="Estudio MUDA — Palermo, Buenos Aires"
           className={styles.heroImg}
         />
@@ -68,7 +68,7 @@ export default function Estudio() {
             {estudioFotos.map((p, i) => (
               <img
                 key={p.id}
-                src={imgUrl(p.id, 'w_1600,h_1040,c_fill,g_auto,q_auto,f_auto')}
+                src={imgUrl(p.id, `${ESTUDIO_FX},w_1600,h_1040,c_fill,g_auto,q_auto,f_auto`)}
                 alt={p.label}
                 className={`${styles.stageImg} ${i === active ? styles.on : ''}`}
                 loading={i === 0 ? 'eager' : 'lazy'}
@@ -92,7 +92,7 @@ export default function Estudio() {
               onClick={() => setActive(i)}
               aria-label={p.label}
             >
-              <img src={imgUrl(p.id, 'w_300,h_300,c_fill,g_auto,q_auto,f_auto')} alt={p.label} loading="lazy" />
+              <img src={imgUrl(p.id, `${ESTUDIO_FX},w_300,h_300,c_fill,g_auto,q_auto,f_auto`)} alt={p.label} loading="lazy" />
             </button>
           ))}
         </div>
@@ -119,7 +119,7 @@ export default function Estudio() {
           <button className={styles.lbClose} onClick={() => setLightbox(false)} aria-label="Cerrar">✕</button>
           <button className={`${styles.lbNav} ${styles.lbL}`} onClick={e => { e.stopPropagation(); go(-1) }} aria-label="Anterior">←</button>
           <img
-            src={imgUrl(cur.id, 'w_1900,q_auto,f_auto')}
+            src={imgUrl(cur.id, `${ESTUDIO_FX},w_1900,q_auto,f_auto`)}
             alt={cur.label}
             className={styles.lbImg}
             onClick={e => e.stopPropagation()}

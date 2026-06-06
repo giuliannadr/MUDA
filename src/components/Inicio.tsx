@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import type { View } from '../App'
 import { supabase, type Talento } from '../lib/supabase'
 import { imgUrl } from '../lib/cloudinary'
+import { ESTUDIO_FX } from '../lib/estudioFotos'
 import { TalentDetail } from './Agencia'
 import styles from './Inicio.module.css'
 
@@ -286,16 +287,16 @@ export default function Inicio({ navigate, onCurtainChange }: Props) {
           </div>
           <div className={styles.estudioFotos}>
             <div className={styles.estudioMain} onClick={() => navigate('estudio')}>
-              <img src={imgUrl('espacio5_fqt5ug', 'w_1300,h_900,c_fill,g_auto,q_auto,f_auto')} alt="Estudio MUDA — Sala Infinito" className={styles.estudioImg} loading="lazy" />
+              <img src={imgUrl('espacio5_fqt5ug', `${ESTUDIO_FX},w_1300,h_900,c_fill,g_auto,q_auto,f_auto`)} alt="Estudio MUDA — Sala Infinito" className={styles.estudioImg} loading="lazy" />
               <span className={styles.photoTagLight}>Sala Infinito</span>
             </div>
             <div className={styles.estudioGrid}>
               <div className={styles.estudioSm} onClick={() => navigate('estudio')}>
-                <img src={imgUrl('espacio1_wmgx1f', 'w_760,h_570,c_fill,g_auto,q_auto,f_auto')} alt="Estudio MUDA" className={styles.estudioImg} loading="lazy" />
+                <img src={imgUrl('espacio1_wmgx1f', `${ESTUDIO_FX},w_760,h_570,c_fill,g_auto,q_auto,f_auto`)} alt="Estudio MUDA" className={styles.estudioImg} loading="lazy" />
                 <span className={styles.photoTagLight}>El set</span>
               </div>
               <div className={styles.estudioSm} onClick={() => navigate('estudio')}>
-                <img src={imgUrl('espacio2_b7rpbk', 'w_760,h_570,c_fill,g_auto,q_auto,f_auto')} alt="Estudio MUDA" className={styles.estudioImg} loading="lazy" />
+                <img src={imgUrl('espacio2_b7rpbk', `${ESTUDIO_FX},w_760,h_570,c_fill,g_auto,q_auto,f_auto`)} alt="Estudio MUDA" className={styles.estudioImg} loading="lazy" />
                 <span className={styles.photoTagLight}>Palermo</span>
               </div>
             </div>
