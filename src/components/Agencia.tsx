@@ -101,7 +101,6 @@ export function TalentDetail({ t, onClose }: { t: Talento; onClose: () => void }
         ['Pelo',     t.pelo],
         ['Ojos',     t.ojos],
         ['Ubicación',t.ubicacion],
-        ['Form. / Exp.', t.formacion],
       ] as [string, string][]).filter(([, v]) => v)
     : ([['Edad', t.edad ? `${t.edad} años` : '']] as [string, string][]).filter(([, v]) => v)
 
@@ -145,6 +144,14 @@ export function TalentDetail({ t, onClose }: { t: Talento; onClose: () => void }
                   <span className={styles.modalDatoV}>{v}</span>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Formación / Experiencia — a todo el ancho (puede ser texto largo) */}
+          {t.formacion && (
+            <div className={styles.modalFormacion}>
+              <span className={styles.modalDatoK}>Formación / Experiencia</span>
+              <p className={styles.modalFormacionText}>{t.formacion}</p>
             </div>
           )}
 

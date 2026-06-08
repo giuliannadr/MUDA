@@ -30,6 +30,7 @@ export default function App() {
   const [displayed, setDisplayed] = useState<View>(initial)
   const [animating, setAnimating] = useState(false)
   const [curtainOpen, setCurtainOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 820)
   const mainRef = useRef<HTMLDivElement>(null)
   const homeScroll = useRef(0)   // recuerda dónde quedó el scroll del home
 
@@ -54,6 +55,13 @@ export default function App() {
       setAnimating(false)
     }, 300)
   }
+
+  // Detectar mobile para mostrar siempre el nav (hamburguesa) en pantallas chicas
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 820)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   // Botón atrás/adelante del navegador → cambiar de sección
   useEffect(() => {
@@ -103,7 +111,7 @@ export default function App() {
     <>
       <div className="grain" />
       <Cursor />
-      {(current !== 'inicio' || curtainOpen) && <Nav current={current} navigate={navigate} />}
+      {(current !== 'inicio' || curtainOpen || isMobile) && <Nav current={current} navigate={navigate} />}
       <div
         ref={mainRef}
         className={`view-wrap ${animating ? 'view-exit' : 'view-enter'}`}
