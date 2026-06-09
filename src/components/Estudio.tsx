@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect } from 'react'
 import type { View } from '../App'
 import styles from './Estudio.module.css'
 import { imgUrl } from '../lib/cloudinary'
@@ -47,9 +48,98 @@ const chapters: Chapter[] = [
   },
 ]
 
-// Ancho fijo, alto natural → la foto se ve completa, sin recortes
+// Ancho fijo, alto natural → en desktop la foto se ve completa, sin recortes
 const pic = (id: string, fx: boolean) =>
   imgUrl(id, `${fx ? `${ESTUDIO_FX},` : ''}w_1000,q_auto,f_auto`)
+
+const SLIDE_MS = 3800 // tiempo en cada imagen del carrusel (mobile)
+
+// Anima el scroll horizontal a mano (no depende de scroll-behavior: smooth)
+function animateScroll(el: HTMLElement, target: number, dur = 650) {
+  const start = el.scrollLeft
+  const change = target - start
+  if (Math.abs(change) < 1) return
+  const t0 = performance.now()
+  const step = (now: number) => {
+    const p = Math.min((now - t0) / dur, 1)
+    const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2
+    el.scrollLeft = start + change * ease
+    if (p < 1) requestAnimationFrame(step)
+  }
+  requestAnimationFrame(step)
+}
+
+/* Fotos del capítulo:
+   - desktop: pila vertical (alto natural, sin recortes)
+   - mobile: carrusel que pasa solo, infinito, y se puede deslizar a mano */
+function ChapterPhotos({ ch }: { ch: Chapter }) {
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState(0)
+  const pausedUntil = useRef(0)
+
+  useEffect(() => {
+    const el = trackRef.current
+    if (!el || ch.photos.length < 2) return
+    const mq = window.matchMedia('(max-width: 760px)')
+
+    const timer = window.setInterval(() => {
+      if (!mq.matches || !el.clientWidth || Date.now() < pausedUntil.current) return
+      const cur = Math.round(el.scrollLeft / el.clientWidth)
+      const next = (cur + 1) % ch.photos.length
+      animateScroll(el, el.clientWidth * next)
+    }, SLIDE_MS)
+
+    const onScroll = () => {
+      if (el.clientWidth) setActive(Math.round(el.scrollLeft / el.clientWidth))
+    }
+    // al tocar/deslizar, pausa el auto unos segundos
+    const onTouch = () => { pausedUntil.current = Date.now() + 6000 }
+
+    el.addEventListener('scroll', onScroll, { passive: true })
+    el.addEventListener('touchstart', onTouch, { passive: true })
+    return () => {
+      clearInterval(timer)
+      el.removeEventListener('scroll', onScroll)
+      el.removeEventListener('touchstart', onTouch)
+    }
+  }, [ch.photos.length])
+
+  const goTo = (i: number) => {
+    const el = trackRef.current
+    if (!el) return
+    pausedUntil.current = Date.now() + 6000
+    animateScroll(el, el.clientWidth * i)
+  }
+
+  return (
+    <div className={styles.photos}>
+      <div className={styles.track} ref={trackRef}>
+        {ch.photos.map(id => (
+          <figure key={id} className={styles.cell}>
+            <img
+              src={pic(id, ch.fx)}
+              alt={`Estudio MUDA — ${ch.title}`}
+              loading="lazy"
+              className={styles.cellImg}
+            />
+          </figure>
+        ))}
+      </div>
+      {ch.photos.length > 1 && (
+        <div className={styles.dots}>
+          {ch.photos.map((_, i) => (
+            <button
+              key={i}
+              className={`${styles.dot} ${i === active ? styles.dotOn : ''}`}
+              onClick={() => goTo(i)}
+              aria-label={`Foto ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Estudio({ navigate }: { navigate: (v: View) => void }) {
   return (
@@ -78,18 +168,7 @@ export default function Estudio({ navigate }: { navigate: (v: View) => void }) {
               <p className={styles.chapterDesc}>{ch.desc}</p>
             </div>
 
-            <div className={`${styles.photos} ${ch.photos.length === 1 ? styles.single : ''}`}>
-              {ch.photos.map(id => (
-                <figure key={id} className={styles.cell}>
-                  <img
-                    src={pic(id, ch.fx)}
-                    alt={`Estudio MUDA — ${ch.title}`}
-                    loading="lazy"
-                    className={styles.cellImg}
-                  />
-                </figure>
-              ))}
-            </div>
+            <ChapterPhotos ch={ch} />
           </section>
         ))}
       </div>

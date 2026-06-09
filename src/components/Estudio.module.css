@@ -96,8 +96,10 @@
   color: rgba(10,9,8,0.62);
 }
 
-/* columna de fotos: pila vertical, alto natural (no se recortan) */
-.photos {
+/* columna de fotos */
+.photos { width: 100%; }
+/* desktop: pila vertical, alto natural (no se recortan) */
+.track {
   display: flex;
   flex-direction: column;
   gap: clamp(0.7rem, 1.6vw, 1.1rem);
@@ -113,6 +115,7 @@
   height: auto;
   display: block;
 }
+.dots { display: none; }
 
 /* ── CTA ── */
 .cta {
@@ -178,4 +181,41 @@
   .text { position: static; }
   .chapterNum { margin-bottom: 0.6rem; }
   .ctaBtns { flex-direction: column; }
+
+  /* carrusel: las fotos en fila, deslizables con snap */
+  .track {
+    flex-direction: row;
+    gap: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-radius: 2px;
+  }
+  .track::-webkit-scrollbar { display: none; }
+  .cell {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    aspect-ratio: 3 / 4;
+    box-shadow: none;
+  }
+  .cellImg { height: 100%; object-fit: cover; }
+
+  /* puntitos indicadores */
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 0.9rem;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    border: 0;
+    padding: 0;
+    background: rgba(10,9,8,0.18);
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+  }
+  .dotOn { background: var(--terra); transform: scale(1.35); }
 }
