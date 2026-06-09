@@ -3,7 +3,7 @@ import type { View } from '../App'
 import styles from './Estudio.module.css'
 import { imgUrl } from '../lib/cloudinary'
 import { ESTUDIO_FX } from '../lib/estudioFotos'
-import { whatsappLink, WEB3FORMS_KEY } from '../lib/config'
+import { whatsappLink, WEB3FORMS_KEY, MUDA_EMAIL } from '../lib/config'
 
 type Chapter = {
   n: string
@@ -141,38 +141,103 @@ function ChapterPhotos({ ch }: { ch: Chapter }) {
   )
 }
 
-/* Formulario de consulta → manda un mail con los datos (vía Web3Forms) */
+const TIPOS = ['Sesión de fotos', 'Audiovisual', 'Creación de contenido', 'Campaña / e-commerce', 'Otro']
+
+/* Select custom (diseñado, no el nativo del navegador) */
+function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [])
+  return (
+    <div className={styles.select} ref={ref}>
+      <button
+        type="button"
+        className={`${styles.selectBtn} ${open ? styles.selectOpen : ''}`}
+        onClick={() => setOpen(o => !o)}
+      >
+        <span>{value}</span>
+        <span className={styles.selectChevron}>⌄</span>
+      </button>
+      {open && (
+        <ul className={styles.selectList}>
+          {options.map(o => (
+            <li key={o}>
+              <button
+                type="button"
+                className={`${styles.selectOpt} ${o === value ? styles.selectOptOn : ''}`}
+                onClick={() => { onChange(o); setOpen(false) }}
+              >
+                {o}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+/* Formulario de consulta → manda un mail con los datos a MUDA */
 function ConsultaForm() {
-  const [f, setF] = useState({ nombre: '', email: '', telefono: '', fecha: '', tipo: 'Sesión de fotos', mensaje: '' })
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
-  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+  const [f, setF] = useState({ nombre: '', email: '', telefono: '', fecha: '', tipo: TIPOS[0], mensaje: '' })
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'mailto' | 'error'>('idle')
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setF(s => ({ ...s, [k]: e.target.value }))
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!WEB3FORMS_KEY) { setStatus('error'); return }
-    setStatus('sending')
-    try {
-      const res = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          access_key: WEB3FORMS_KEY,
-          subject: `Consulta de estudio — ${f.nombre || 'sin nombre'}`,
-          from_name: 'Web MUDA · Estudio',
-          Nombre: f.nombre,
-          Email: f.email,
-          'WhatsApp / Teléfono': f.telefono,
-          'Para cuándo': f.fecha,
-          'Tipo de producción': f.tipo,
-          Mensaje: f.mensaje,
-        }),
-      })
-      const data = await res.json()
-      setStatus(data.success ? 'sent' : 'error')
-    } catch {
-      setStatus('error')
+
+    // Opción A: envío silencioso por Web3Forms (si hay access key cargada)
+    if (WEB3FORMS_KEY) {
+      setStatus('sending')
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: WEB3FORMS_KEY,
+            subject: `Consulta de estudio — ${f.nombre || 'sin nombre'}`,
+            from_name: 'Web MUDA · Estudio',
+            Nombre: f.nombre,
+            Email: f.email,
+            'WhatsApp / Teléfono': f.telefono,
+            'Para cuándo': f.fecha,
+            'Tipo de producción': f.tipo,
+            Mensaje: f.mensaje,
+          }),
+        })
+        const data = await res.json()
+        setStatus(data.success ? 'sent' : 'error')
+      } catch {
+        setStatus('error')
+      }
+      return
     }
+
+    // Opción B (fallback): abre el mail del usuario ya armado hacia MUDA
+    if (MUDA_EMAIL) {
+      const body = [
+        `Nombre: ${f.nombre}`,
+        `Email: ${f.email}`,
+        `WhatsApp / Teléfono: ${f.telefono}`,
+        `Para cuándo: ${f.fecha}`,
+        `Tipo de producción: ${f.tipo}`,
+        '',
+        f.mensaje,
+      ].join('\n')
+      window.location.href =
+        `mailto:${MUDA_EMAIL}?subject=${encodeURIComponent(`Consulta de estudio — ${f.nombre || ''}`)}&body=${encodeURIComponent(body)}`
+      setStatus('mailto')
+      return
+    }
+
+    setStatus('error')
   }
 
   if (status === 'sent') {
@@ -194,11 +259,7 @@ function ConsultaForm() {
         <input className={styles.input} placeholder="WhatsApp / teléfono" value={f.telefono} onChange={set('telefono')} />
         <input className={styles.input} placeholder="¿Para cuándo?" value={f.fecha} onChange={set('fecha')} />
       </div>
-      <select className={styles.input} value={f.tipo} onChange={set('tipo')}>
-        {['Sesión de fotos', 'Audiovisual', 'Creación de contenido', 'Campaña / e-commerce', 'Otro'].map(o => (
-          <option key={o}>{o}</option>
-        ))}
-      </select>
+      <Select value={f.tipo} onChange={v => setF(s => ({ ...s, tipo: v }))} options={TIPOS} />
       <textarea
         className={styles.textarea}
         placeholder="Contanos tu proyecto: qué necesitás, fechas, equipo…"
@@ -209,12 +270,11 @@ function ConsultaForm() {
       <button className={styles.formBtn} type="submit" disabled={status === 'sending'}>
         {status === 'sending' ? 'Enviando…' : 'Enviar consulta →'}
       </button>
+      {status === 'mailto' && (
+        <p className={styles.formHint}>Te abrimos tu app de mail con la consulta lista para enviar ✉️</p>
+      )}
       {status === 'error' && (
-        <p className={styles.formError}>
-          {WEB3FORMS_KEY
-            ? 'No se pudo enviar. Probá por WhatsApp 👉'
-            : 'El formulario todavía no está activo. Por ahora escribinos por WhatsApp 👉'}
-        </p>
+        <p className={styles.formError}>No se pudo enviar. Probá por WhatsApp 👉</p>
       )}
     </form>
   )

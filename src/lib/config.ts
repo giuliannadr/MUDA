@@ -2,6 +2,10 @@
 // Formato internacional sin + ni espacios. Ej: 5491155551234
 export const WHATSAPP = (import.meta.env.VITE_WHATSAPP as string) || ''
 
+// Mail de MUDA donde llegan las consultas (.env → VITE_MUDA_EMAIL)
+export const MUDA_EMAIL =
+  (import.meta.env.VITE_MUDA_EMAIL as string) || ''
+
 export const whatsappLink = (mensaje: string) =>
   `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}`
 
