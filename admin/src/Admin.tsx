@@ -57,7 +57,10 @@ function Login({ onLogin }: { onLogin: () => void }) {
 }
 
 /* ── Upload foto ───────────────────────────────────────────── */
-function FotoUpload({ url, onUrl }: { url: string; onUrl: (u: string) => void }) {
+// Filtro "Realzar color" (mismo que la web). Se antepone a las transformaciones.
+const ESTUDIO_FX = 'e_brightness:-16,e_contrast:24,e_saturation:10'
+
+function FotoUpload({ url, onUrl, fx }: { url: string; onUrl: (u: string) => void; fx?: boolean }) {
   const [busy, setBusy]     = useState(false)
   const [preview, setPrev]  = useState<string | null>(null)
   const ref = useRef<HTMLInputElement>(null)
@@ -77,7 +80,7 @@ function FotoUpload({ url, onUrl }: { url: string; onUrl: (u: string) => void })
     }
   }
 
-  const shownImg = preview ?? (url ? imgUrl(url, 'w_400,h_520,c_fill,q_auto') : null)
+  const shownImg = preview ?? (url ? imgUrl(url, `${fx ? `${ESTUDIO_FX},` : ''}w_400,h_520,c_fill,q_auto`) : null)
 
   return (
     <div
@@ -537,7 +540,7 @@ function WizardProduccion({
         <div className="flex flex-col gap-2">
           <label className={fieldLabel}>Foto de portada</label>
           <div className="max-w-[240px]">
-            <FotoUpload url={f.cover} onUrl={u => setF(p => ({ ...p, cover: u }))} />
+            <FotoUpload url={f.cover} onUrl={u => setF(p => ({ ...p, cover: u }))} fx={f.fx} />
           </div>
         </div>
 
@@ -570,7 +573,7 @@ function WizardProduccion({
           <div className="flex flex-wrap gap-2">
             {(f.images ?? []).map((u, i) => (
               <div key={i} className="relative w-[90px] h-[112px] group">
-                <img src={imgUrl(u, 'w_160,h_200,c_fill,q_auto')} alt="" className="w-full h-full object-cover" />
+                <img src={imgUrl(u, `${f.fx ? `${ESTUDIO_FX},` : ''}w_160,h_200,c_fill,q_auto`)} alt="" className="w-full h-full object-cover" />
                 <button type="button" onClick={() => removeGaleria(i)}
                   className="absolute top-[3px] right-[3px] w-[22px] h-[22px] bg-ink/60 text-white border-none text-[0.55rem] cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   ✕
