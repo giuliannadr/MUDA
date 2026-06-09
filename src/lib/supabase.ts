@@ -47,3 +47,27 @@ export const TALENTO_VACIO: Omit<Talento, 'id' | 'created_at'> = {
   estilo: '',
   portada_1: '', portada_2: '', galeria: [],
 }
+
+export type CategoriaProduccion = 'produccion' | 'evento'
+
+export type Produccion = {
+  id: string
+  categoria: CategoriaProduccion
+  title: string
+  tipo: string
+  year: string
+  cover: string
+  images: string[]
+  fx: boolean
+  created_at: string
+}
+
+export const PRODUCCION_VACIA: Omit<Produccion, 'id' | 'created_at'> = {
+  categoria: 'produccion',
+  title: '',
+  tipo: 'Moda & Editorial',
+  year: new Date().getFullYear().toString(),
+  cover: '',
+  images: [],
+  fx: false,
+}

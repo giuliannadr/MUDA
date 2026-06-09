@@ -169,13 +169,24 @@
   padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 4vw, 3rem);
 }
 .lbGallery {
-  max-width: 820px;
+  max-width: 1200px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(0.8rem, 2vw, 1.4rem);
+  column-count: 1;
+  column-gap: clamp(0.8rem, 2vw, 1.4rem);
 }
-.lbCell { margin: 0; overflow: hidden; background: #221813; }
+@media (min-width: 600px) {
+  .lbGallery { column-count: 2; }
+}
+@media (min-width: 1000px) {
+  .lbGallery { column-count: 3; }
+}
+.lbCell {
+  margin: 0 0 clamp(0.8rem, 2vw, 1.4rem);
+  overflow: hidden;
+  background: #221813;
+  display: inline-block;
+  width: 100%;
+}
 .lbImg { width: 100%; height: auto; display: block; }
 .lbCount {
   max-width: 820px;

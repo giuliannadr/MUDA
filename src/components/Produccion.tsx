@@ -3,27 +3,7 @@ import { createPortal } from 'react-dom'
 import styles from './Produccion.module.css'
 import { imgUrl } from '../lib/cloudinary'
 import { ESTUDIO_FX } from '../lib/estudioFotos'
-
-type Prod = {
-  id: string
-  title: string
-  tipo: string
-  year: string
-  cover: string
-  fx?: boolean
-  images: string[]
-}
-
-/* ⚠️ PLACEHOLDER: reemplazar por las producciones reales.
-   Cada producción agrupa su propio set de fotos (Cloudinary public_id).
-   'fx: true' aplica el filtro de color (para fotos muy claras/lavadas). */
-const producciones: Prod[] = [
-  { id: 'editorial-otono', title: 'Editorial Otoño', tipo: 'Moda & Editorial', year: '2026', cover: 'espacio1_wmgx1f', fx: true, images: ['espacio1_wmgx1f', 'espacio3_wiwpo3', 'espacio2_b7rpbk'] },
-  { id: 'capsula', title: 'Cápsula', tipo: 'Campaña', year: '2026', cover: 'WhatsApp_Image_2026-06-09_at_08.29.49_jj8uy2', images: ['WhatsApp_Image_2026-06-09_at_08.29.49_jj8uy2', 'WhatsApp_Image_2026-06-09_at_08.29.49_1_uxgvvq'] },
-  { id: 'single', title: 'Single — Videoclip', tipo: 'Videoclip', year: '2025', cover: 'WhatsApp_Image_2026-06-09_at_08.30.07_nvfadc', images: ['WhatsApp_Image_2026-06-09_at_08.30.07_nvfadc', 'WhatsApp_Image_2026-06-09_at_08.30.08_wvno2a'] },
-  { id: 'lookbook', title: 'Lookbook', tipo: 'E-commerce', year: '2025', cover: 'espacio4_xggrbc', fx: true, images: ['espacio4_xggrbc', 'espacio2_b7rpbk'] },
-  { id: 'marca', title: 'Identidad de Marca', tipo: 'Contenido', year: '2025', cover: 'WhatsApp_Image_2026-06-09_at_08.30.07_1_rnvsjz', images: ['WhatsApp_Image_2026-06-09_at_08.30.07_1_rnvsjz'] },
-]
+import { supabase, type Produccion as Prod } from '../lib/supabase'
 
 const cov = (id: string, fx?: boolean) =>
   imgUrl(id, `${fx ? `${ESTUDIO_FX},` : ''}w_640,h_820,c_fill,g_auto,q_auto,f_auto`)
@@ -35,6 +15,14 @@ export default function Produccion() {
   const [hover, setHover] = useState<number | null>(null)
   const [open, setOpen] = useState<Prod | null>(null)
   const [pos, setPos] = useState({ x: 0, y: 0 })
+  const [producciones, setProducciones] = useState<Prod[]>([])
+
+  useEffect(() => {
+    supabase.from('producciones')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => setProducciones(data ?? []))
+  }, [])
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
@@ -73,6 +61,11 @@ export default function Produccion() {
               <img className={styles.rowCover} src={cov(p.cover, p.fx)} alt={p.title} loading="lazy" />
             </li>
           ))}
+          {producciones.length === 0 && (
+            <li className={styles.row}>
+              <span className={styles.rowTitle} style={{ color: 'var(--muda-gray)' }}>Próximamente...</span>
+            </li>
+          )}
         </ul>
 
         <div className={`${styles.nota} reveal`}>
