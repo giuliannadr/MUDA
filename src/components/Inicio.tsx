@@ -276,34 +276,37 @@ export default function Inicio({ navigate, onCurtainChange }: Props) {
 
         {/* ══ ESTUDIO ════════════════════════════════════════ */}
         <section className={styles.estudio} data-nav="dark">
-          <div className={styles.estudioPanel}>
-            <p className={styles.secLabelLight}>05 — Estudio</p>
-            <h2 className={styles.estudioH}>Palermo,<br /><em>Buenos Aires.</em></h2>
-            <p className={styles.estudioBody}>
-              Sala infinito de cuatro paredes. Salas múltiples, catering incluido y servicios add-on.
-            </p>
-            <div className={styles.estudioTags}>
-              {['Sala Infinito', 'Salas múltiples', 'Catering', 'Fotógrafe add-on'].map(t => (
-                <span key={t} className={styles.estudioTag}>{t}</span>
-              ))}
+          <div className={styles.estudioHead}>
+            <div>
+              <p className={styles.secLabelLight}>05 — Estudio</p>
+              <h2 className={styles.estudioH}>El espacio donde<br />todo <em>cobra vida.</em></h2>
             </div>
-            <button className={styles.ghostBtnCream} onClick={() => navigate('estudio')}>Ver estudio →</button>
+            <div className={styles.estudioHeadRight}>
+              <p className={styles.estudioBody}>
+                Nuestro espacio en Palermo: sala infinito de cuatro paredes, salas privadas
+                y café para el equipo. Pensado para producciones de todo tipo.
+              </p>
+              <button className={styles.ghostBtnCream} onClick={() => navigate('estudio')}>Ver el estudio →</button>
+            </div>
           </div>
-          <div className={styles.estudioFotos}>
-            <div className={styles.estudioMain} onClick={() => navigate('estudio')}>
-              <img src={imgUrl('espacio5_fqt5ug', `${ESTUDIO_FX},w_1300,h_900,c_fill,g_auto,q_auto,f_auto`)} alt="Estudio MUDA — Sala Infinito" className={styles.estudioImg} loading="lazy" />
-              <span className={styles.photoTagLight}>Sala Infinito</span>
-            </div>
-            <div className={styles.estudioGrid}>
-              <div className={styles.estudioSm} onClick={() => navigate('estudio')}>
-                <img src={imgUrl('espacio1_wmgx1f', `${ESTUDIO_FX},w_760,h_570,c_fill,g_auto,q_auto,f_auto`)} alt="Estudio MUDA" className={styles.estudioImg} loading="lazy" />
-                <span className={styles.photoTagLight}>El set</span>
-              </div>
-              <div className={styles.estudioSm} onClick={() => navigate('estudio')}>
-                <img src={imgUrl('espacio2_b7rpbk', `${ESTUDIO_FX},w_760,h_570,c_fill,g_auto,q_auto,f_auto`)} alt="Estudio MUDA" className={styles.estudioImg} loading="lazy" />
-                <span className={styles.photoTagLight}>Palermo</span>
-              </div>
-            </div>
+
+          <div className={styles.estudioCats}>
+            {[
+              { id: 'espacio1_wmgx1f', fx: true, n: '01', label: 'Espacio Infinito' },
+              { id: 'WhatsApp_Image_2026-06-09_at_08.29.49_jj8uy2', fx: false, n: '02', label: 'Salas Privadas' },
+              { id: 'WhatsApp_Image_2026-06-09_at_08.30.07_1_rnvsjz', fx: false, n: '03', label: 'Café & Comida' },
+            ].map(c => (
+              <button key={c.id} className={styles.estudioCat} onClick={() => navigate('estudio')}>
+                <img
+                  src={imgUrl(c.id, `${c.fx ? `${ESTUDIO_FX},` : ''}w_700,h_950,c_fill,g_auto,q_auto,f_auto`)}
+                  alt={`Estudio MUDA — ${c.label}`}
+                  className={styles.estudioCatImg}
+                  loading="lazy"
+                />
+                <span className={styles.estudioCatN}>{c.n}</span>
+                <span className={styles.estudioCatLabel}>{c.label}</span>
+              </button>
+            ))}
           </div>
         </section>
 

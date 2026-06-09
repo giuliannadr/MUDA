@@ -718,104 +718,94 @@
   line-height: 1.3;
 }
 
-/* ══ ESTUDIO — panel bordo sólido + fotos ═════════════════ */
+/* ══ ESTUDIO — editorial: encabezado + 3 categorías ═══════ */
 .estudio {
-  display: grid;
-  grid-template-columns: 38% 62%;
-  min-height: 85vh;
-}
-
-.estudioPanel {
   background: var(--burgundy);
-  padding: 6rem 3.5rem 5rem;
+  padding: clamp(4rem, 8vw, 7rem) clamp(1.5rem, 5vw, 5rem);
   display: flex;
   flex-direction: column;
-  gap: 2.2rem;
-  justify-content: center;
+  gap: clamp(2.5rem, 5vw, 4rem);
+}
+
+.estudioHead {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: end;
+}
+.estudioHeadRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.6rem;
 }
 
 .estudioH {
   font-family: var(--f-display);
-  font-size: clamp(2.5rem, 4vw, 3.8rem);
+  font-size: clamp(2.3rem, 4.5vw, 4rem);
   font-weight: 300;
-  line-height: 1.05;
+  line-height: 1.02;
   color: var(--cream);
 }
-
-.estudioH em {
-  font-style: italic;
-  color: var(--terra);
-}
+.estudioH em { font-style: italic; color: var(--terra); }
 
 .estudioBody {
   font-family: var(--f-display);
-  font-size: 0.95rem;
-  line-height: 1.75;
-  color: rgba(240,234,216,0.65);
+  font-size: clamp(0.95rem, 1.3vw, 1.08rem);
+  line-height: 1.7;
+  color: rgba(240,234,216,0.66);
+  max-width: 42ch;
 }
 
-.estudioTags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.estudioTag {
-  font-family: var(--f-mono);
-  font-size: 0.56rem;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  color: rgba(240,234,216,0.55);
-  border: 1px solid rgba(240,234,216,0.2);
-  padding: 0.28rem 0.7rem;
-}
-
-.estudioFotos {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background: var(--bg-2);
-}
-
-.estudioMain {
-  position: relative;
-  flex: 1;
-  min-height: 55%;
-  overflow: hidden;
-  background: #14100e;
-  display: flex;
-  align-items: flex-end;
-  padding: 1.5rem;
-  cursor: pointer;
-}
-
-.estudioGrid {
+/* 3 categorías */
+.estudioCats {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.7rem, 1.4vw, 1.1rem);
 }
-
-.estudioSm {
+.estudioCat {
   position: relative;
-  aspect-ratio: 4/3;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
-  background: #14100e;
-  display: flex;
-  align-items: flex-end;
-  padding: 0.9rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
   cursor: pointer;
+  background: #14100e;
 }
-
-/* foto que llena la celda */
-.estudioImg {
+.estudioCatImg {
   position: absolute;
   inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  transition: transform 0.8s cubic-bezier(0.16,1,0.3,1), filter 0.5s;
+  transition: transform 0.9s cubic-bezier(0.16,1,0.3,1), filter 0.5s;
 }
-.estudioMain:hover .estudioImg,
-.estudioSm:hover .estudioImg { transform: scale(1.05); filter: brightness(1.05); }
+.estudioCat:hover .estudioCatImg { transform: scale(1.06); filter: brightness(1.07); }
+.estudioCat::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(10,9,8,0.7), transparent 55%);
+  pointer-events: none;
+}
+.estudioCatN {
+  position: absolute;
+  top: 1rem; left: 1.2rem;
+  z-index: 1;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: clamp(1.3rem, 2vw, 1.8rem);
+  color: var(--terra);
+}
+.estudioCatLabel {
+  position: absolute;
+  bottom: 1.1rem; left: 1.2rem; right: 1rem;
+  z-index: 1;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cream);
+}
 /* degradé para que la etiqueta se lea sobre la foto */
 .estudioMain::after,
 .estudioSm::after {
@@ -920,9 +910,20 @@
   .agencia { padding: 5rem 2rem 4rem; }
   .agenciaStrip { grid-template-columns: repeat(3, 1fr); }
 
-  .estudio { grid-template-columns: 1fr; }
-  .estudioPanel { padding: 4rem 2rem; }
-  .estudioFotos { min-height: 60vh; }
+  .estudioHead { grid-template-columns: 1fr; gap: 1.4rem; align-items: start; }
+  /* categorías: fila deslizable en mobile/tablet */
+  .estudioCats {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -2rem;
+    padding: 0 2rem;
+  }
+  .estudioCats::-webkit-scrollbar { display: none; }
+  .estudioCat { flex: 0 0 70%; scroll-snap-align: center; }
 
   .contactoH     { padding: 4rem 2rem 2.5rem; font-size: clamp(3rem, 12vw, 8rem); }
   .contactoRight { flex-direction: column; align-items: flex-start; gap: 2rem; padding: 2.5rem 2rem; }
