@@ -79,26 +79,30 @@ export default function Portfolio({ categoria, emptyText = 'Próximamente…' }:
       {open && createPortal(
         <div className={styles.ov}>
           <header className={styles.ovHead}>
-            <div>
-              <p className={styles.ovType}>{open.tipo} · {open.year}</p>
-              <h3 className={styles.ovTitle}>{open.title}</h3>
+            <div className={`${styles.ovInner} ${styles.ovHeadRow}`}>
+              <div>
+                <p className={styles.ovType}>{open.tipo} · {open.year}</p>
+                <h3 className={styles.ovTitle}>{open.title}</h3>
+              </div>
+              <button className={styles.ovClose} onClick={close} aria-label="Cerrar">✕</button>
             </div>
-            <button className={styles.ovClose} onClick={close} aria-label="Cerrar">✕</button>
           </header>
 
           <div className={styles.ovScroll}>
-            {open.descripcion && <p className={styles.ovDesc}>{open.descripcion}</p>}
-            <div className={styles.thumbs}>
-              {(open.images ?? []).map((id, i) => (
-                <button key={i} className={styles.thumb} onClick={() => setIdx(i)} aria-label={`Foto ${i + 1}`}>
-                  <img src={thumb(id, open.fx)} alt={`${open.title} ${i + 1}`} loading="lazy" />
-                  <span className={styles.thumbZoom}>⤢</span>
-                </button>
-              ))}
+            <div className={styles.ovInner}>
+              {open.descripcion && <p className={styles.ovDesc}>{open.descripcion}</p>}
+              <div className={styles.thumbs}>
+                {(open.images ?? []).map((id, i) => (
+                  <button key={i} className={styles.thumb} onClick={() => setIdx(i)} aria-label={`Foto ${i + 1}`}>
+                    <img src={thumb(id, open.fx)} alt={`${open.title} ${i + 1}`} loading="lazy" />
+                    <span className={styles.thumbZoom}>⤢</span>
+                  </button>
+                ))}
+              </div>
+              {(open.images ?? []).length === 0 && (
+                <p className={styles.ovEmpty}>Esta producción todavía no tiene fotos.</p>
+              )}
             </div>
-            {(open.images ?? []).length === 0 && (
-              <p className={styles.ovEmpty}>Esta producción todavía no tiene fotos.</p>
-            )}
           </div>
 
           {/* Visor de una imagen a pantalla */}
