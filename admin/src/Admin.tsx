@@ -446,7 +446,7 @@ function WizardProduccion({
   }
 
   const addGaleria = async (file: File) => {
-    if ((f.images ?? []).length >= 15) return
+    if ((f.images ?? []).length >= 12) return
     const u = await uploadImage(file)
     setF(p => ({ ...p, images: [...(p.images ?? []), u] }))
   }
@@ -548,9 +548,9 @@ function WizardProduccion({
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-4 mb-1">
             <label className={fieldLabel}>
-              Galería <span className="text-ink/25 normal-case tracking-normal ml-2">{(f.images ?? []).length}/15 fotos</span>
+              Galería <span className="text-ink/25 normal-case tracking-normal ml-2">{(f.images ?? []).length}/12 fotos</span>
             </label>
-            {(f.images ?? []).length < 15 && (
+            {(f.images ?? []).length < 12 && (
               <button type="button" disabled={galBusy > 0} onClick={() => galeriaRef.current?.click()}
                 className="font-mono text-[0.55rem] tracking-[0.12em] uppercase text-burgundy bg-transparent border border-burgundy/25 px-3 py-1.5 cursor-pointer transition-all hover:bg-burgundy hover:text-white disabled:opacity-40">
                 + Agregar
@@ -564,7 +564,7 @@ function WizardProduccion({
             )}
             <input ref={galeriaRef} type="file" accept="image/*" multiple hidden
               onChange={async e => {
-                const files = Array.from(e.target.files ?? []).slice(0, 15 - (f.images ?? []).length)
+                const files = Array.from(e.target.files ?? []).slice(0, 12 - (f.images ?? []).length)
                 setGalBusy(files.length)
                 for (const file of files) { await addGaleria(file); setGalBusy(n => n - 1) }
                 e.target.value = ''
@@ -580,7 +580,7 @@ function WizardProduccion({
                 </button>
               </div>
             ))}
-            {(f.images ?? []).length < 15 && (
+            {(f.images ?? []).length < 12 && (
               <div onClick={() => galeriaRef.current?.click()}
                 className="w-[90px] h-[112px] border-[1.5px] border-dashed border-ink/15 flex items-center justify-center text-[1.4rem] text-ink/20 cursor-pointer transition-all hover:border-burgundy hover:text-burgundy">
                 +
