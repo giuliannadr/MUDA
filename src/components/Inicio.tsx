@@ -192,9 +192,9 @@ export default function Inicio({ navigate, onCurtainChange }: Props) {
           </div>
           <div className={styles.serviciosRows}>
             {([
-              { n: '01', view: 'foto-video'         as const, title: 'Producción de fotos & video', sub: 'Producción y dirección integral. Shooting, locación, arte, estilismo.' },
-              { n: '02', view: 'direccion-creativa'  as const, title: 'Dirección Creativa Visual',   sub: 'Conceptualización, moodboards y ejecución estética de campañas y videoclips.' },
-              { n: '03', view: 'contenido-redes'     as const, title: 'Contenido para Redes',        sub: 'Producción estratégica para tu presencia digital.' },
+              { n: '01', view: 'produccion' as const, title: 'Producción & Dirección', sub: 'Producción de foto y video + dirección creativa. Shooting, locación, arte, estilismo y concepto visual.' },
+              { n: '02', view: 'agencia'    as const, title: 'Agencia de Talentos',     sub: 'Base de datos de fotógrafxs, maquilladorxs, modelxs y creativxs para contratar de forma independiente.' },
+              { n: '03', view: 'eventos'    as const, title: 'Organización de Eventos', sub: 'Eventos pensados desde una mirada creativa y estética, de la idea a la ejecución.' },
             ]).map(s => (
               <div key={s.n} className={styles.sRow} onClick={() => navigate(s.view)}>
                 <span className={styles.sNum}>{s.n}</span>
@@ -207,8 +207,8 @@ export default function Inicio({ navigate, onCurtainChange }: Props) {
             ))}
           </div>
           <div className={styles.serviciosCta}>
-            <button className={styles.outlineBtn} onClick={() => navigate('foto-video')}>
-              Ver servicios
+            <button className={styles.outlineBtn} onClick={() => navigate('produccion')}>
+              Ver producción
             </button>
           </div>
         </section>
