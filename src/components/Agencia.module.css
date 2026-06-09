@@ -264,12 +264,13 @@
   position: relative;
   width: 100%;
   max-width: 1000px;
-  height: 86vh;
-  max-height: 720px;
+  height: auto;
+  min-height: 460px;
+  max-height: 90vh;
   background: #ffffff;
   display: grid;
   grid-template-columns: 1.1fr 1fr;
-  overflow: hidden;
+  overflow: hidden auto;   /* crece con el contenido; scroll solo si supera la pantalla */
   animation: modalUp 0.4s var(--ease-expo);
 }
 @keyframes modalUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -299,8 +300,11 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  position: relative;
 }
 .modalMain img {
+  position: absolute;
+  inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
   object-position: top center;   /* muestra desde arriba → no corta la cara */
@@ -347,7 +351,6 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  overflow-y: auto;
   min-height: 0;
 }
 .modalRole {
@@ -463,7 +466,7 @@
     grid-template-columns: 1fr;
     height: auto;
     max-height: 94vh;
-    overflow: hidden;          /* sin scroll dentro del modal */
+    overflow: hidden auto;
   }
   .modalMain { height: 38vh; }
   .modalInfo { padding: 1.4rem 1.6rem 1.6rem; justify-content: flex-start; }
