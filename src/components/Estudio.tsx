@@ -1,190 +1,126 @@
-import { useRef, useState } from 'react'
-import HTMLFlipBook from 'react-pageflip'
 import type { View } from '../App'
 import styles from './Estudio.module.css'
 import { imgUrl } from '../lib/cloudinary'
-import { estudioFotos, ESTUDIO_FX } from '../lib/estudioFotos'
+import { ESTUDIO_FX } from '../lib/estudioFotos'
+import { whatsappLink } from '../lib/config'
 
-const pic = (id: string) =>
-  imgUrl(id, `${ESTUDIO_FX},w_900,h_1240,c_fill,g_auto,q_auto,f_auto`)
+type Chapter = {
+  n: string
+  title: string
+  kicker: string
+  desc: string
+  fx: boolean
+  photos: string[]
+}
 
-const features = [
-  ['Sala Infinito', 'Sala principal tipo infinito de cuatro paredes.'],
-  ['Salas múltiples', 'Vestuario, reuniones, maquillaje o espacios de trabajo.'],
-  ['Catering incluido', 'Para el equipo durante toda la jornada.'],
-  ['Servicios add-on', 'Maquilladora y fotógrafe profesional opcionales.'],
+const chapters: Chapter[] = [
+  {
+    n: '01',
+    title: 'Espacio Infinito',
+    kicker: 'Sala blanca',
+    desc: 'Sala infinito de cuatro paredes, ideal para campañas de moda, e-commerce, contenido y producciones comerciales.',
+    fx: true,
+    photos: ['espacio1_wmgx1f', 'espacio3_wiwpo3', 'espacio2_b7rpbk', 'espacio4_xggrbc'],
+  },
+  {
+    n: '02',
+    title: 'Salas Privadas',
+    kicker: 'Espacios íntimos',
+    desc: 'Salas de usos múltiples adaptables a cada proyecto: vestuario, reuniones de producción, maquillaje o descanso del equipo.',
+    fx: false,
+    photos: [
+      'WhatsApp_Image_2026-06-09_at_08.29.49_jj8uy2',
+      'WhatsApp_Image_2026-06-09_at_08.29.49_1_uxgvvq',
+      'WhatsApp_Image_2026-06-09_at_08.30.07_nvfadc',
+      'WhatsApp_Image_2026-06-09_at_08.30.08_wvno2a',
+    ],
+  },
+  {
+    n: '03',
+    title: 'Café & Comida',
+    kicker: 'Pausa',
+    desc: 'El alquiler incluye catering y una estación de café para que el equipo trabaje cómodo durante toda la jornada.',
+    fx: false,
+    photos: [
+      'WhatsApp_Image_2026-06-09_at_08.30.07_1_rnvsjz',
+      'WhatsApp_Image_2026-06-09_at_08.30.06_livted',
+    ],
+  },
 ]
 
-const pad = (n: number) => String(n).padStart(2, '0')
-
-// react-pageflip marca todas las props como requeridas; lo usamos laxo
-const FlipBook = HTMLFlipBook as unknown as React.ComponentType<any>
+const fxPrefix = (fx: boolean) => (fx ? `${ESTUDIO_FX},` : '')
+const wide = (id: string, fx: boolean) => imgUrl(id, `${fxPrefix(fx)}w_1500,h_950,c_fill,g_auto,q_auto,f_auto`)
+const tall = (id: string, fx: boolean) => imgUrl(id, `${fxPrefix(fx)}w_900,h_1100,c_fill,g_auto,q_auto,f_auto`)
 
 export default function Estudio({ navigate }: { navigate: (v: View) => void }) {
-  const book = useRef<any>(null)
-  const [page, setPage] = useState(0)
-  const [total, setTotal] = useState(0)
-  const [portrait, setPortrait] = useState(false)
-
-  const flip = (dir: number) => {
-    const pf = book.current?.pageFlip?.()
-    if (!pf) return
-    dir > 0 ? pf.flipNext() : pf.flipPrev()
-  }
-
-  const fotoPages = estudioFotos.slice(1) // 5 fotos interiores
-  const totalPages = total || 10
-  const atStart = page <= 0
-  // en doble página (landscape) la última posición muestra 2 hojas → restar 2
-  const atEnd = page >= totalPages - (portrait ? 1 : 2)
-
   return (
-    <section className={styles.section} data-nav="light">
+    <section className={styles.section} data-nav="dark">
+      {/* ── Encabezado ── */}
       <header className={styles.head}>
-        <p className={`${styles.eyebrow} reveal`}>Palermo · Buenos Aires</p>
-        <h2 className={`${styles.headTitle} reveal d1`}>Conocé el <em>estudio.</em></h2>
-        <p className={`${styles.headText} reveal d2`}>
-          Nuestro espacio para producciones, contado como una revista.
-          Arrastrá la esquina o usá las flechas para pasar de hoja.
+        <p className={`${styles.eyebrow}`}>Palermo · Buenos Aires</p>
+        <h2 className={`${styles.headTitle}`}>El <em>estudio.</em></h2>
+        <p className={`${styles.headText}`}>
+          Un espacio pensado para producciones fotográficas, audiovisuales y proyectos
+          creativos. Recorrelo por dentro.
         </p>
       </header>
 
-      <div className={styles.bookWrap}>
-        <FlipBook
-          ref={book}
-          width={400}
-          height={560}
-          size="stretch"
-          minWidth={280}
-          maxWidth={400}
-          minHeight={380}
-          maxHeight={560}
-          usePortrait
-          drawShadow
-          maxShadowOpacity={0.4}
-          flippingTime={750}
-          mobileScrollSupport
-          className={styles.book}
-          onFlip={(e: any) => setPage(e.data)}
-          onChangeOrientation={(e: any) => setPortrait(e.data === 'portrait')}
-          onInit={(e: any) => {
-            setTotal(e.object?.getPageCount?.() ?? 0)
-            setPortrait(book.current?.pageFlip?.()?.getOrientation?.() === 'portrait')
-          }}
-        >
-          {/* p0 — TÍTULO (página de papel) */}
-          <div className={`${styles.page} ${styles.paper} ${styles.titlePage}`}>
-            <div className={styles.titleInner}>
-              <p className={styles.tpKicker}>☆ Estudio</p>
-              <h2 className={styles.tpTitle}>La <em>revista</em><br />del espacio.</h2>
-              <p className={styles.tpLead}>Nuestro espacio en Palermo, contado hoja por hoja.</p>
-              <p className={styles.tpHint}>↗ Arrastrá la esquina o usá las flechas</p>
-              <span className={styles.tpMeta}>Nº 01 · Palermo, Buenos Aires</span>
-            </div>
-          </div>
-
-          {/* p1 — HERO / portada de la nota */}
-          <div className={`${styles.page} ${styles.cover}`}>
-            <img src={pic(estudioFotos[0].id)} className={styles.coverImg} alt="" />
-            <div className={styles.coverShade} />
-            <div className={styles.coverInner}>
-              <p className={styles.mast}>MUDA</p>
-              <div className={styles.coverBottom}>
-                <h3 className={styles.coverTitle}>El<br /><em>Estudio</em></h3>
-                <p className={styles.coverSub}>Palermo, Buenos Aires</p>
+      {/* ── Capítulos ── */}
+      <div className={styles.mag}>
+        {chapters.map(ch => {
+          const restOdd = (ch.photos.length - 1) % 2 === 1
+          return (
+            <section key={ch.n} className={styles.chapter}>
+              <div className={`${styles.chapterHead}`}>
+                <span className={styles.chapterNum}>{ch.n}</span>
+                <div className={styles.chapterMeta}>
+                  <span className={styles.chapterKicker}>{ch.kicker}</span>
+                  <h3 className={styles.chapterTitle}>{ch.title}</h3>
+                  <p className={styles.chapterDesc}>{ch.desc}</p>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* p2 — INTRO (papel) */}
-          <div className={`${styles.page} ${styles.paper}`}>
-            <div className={styles.paperInner}>
-              <p className={styles.section_n}>El espacio</p>
-              <p className={styles.intro}>
-                <span className={styles.drop}>E</span>n MUDA contamos con un espacio en
-                Palermo pensado para producciones fotográficas, audiovisuales y proyectos
-                creativos de todo tipo.
-              </p>
-              <p className={styles.introSm}>
-                Sala infinito de cuatro paredes · salas múltiples · catering incluido ·
-                servicios add-on.
-              </p>
-            </div>
-            <span className={styles.folio}>02</span>
-          </div>
+              <div className={styles.grid}>
+                {ch.photos.map((id, i) => {
+                  const len = ch.photos.length
+                  // con 2 fotos → ambas verticales lado a lado; con 3+ → 1ra grande
+                  const full = (i === 0 && len >= 3) || (i === len - 1 && len >= 4 && restOdd)
+                  return (
+                    <figure
+                      key={id}
+                      className={`${styles.cell} ${full ? styles.full : ''}`}
+                    >
+                      <img
+                        src={full ? wide(id, ch.fx) : tall(id, ch.fx)}
+                        alt={`Estudio MUDA — ${ch.title}`}
+                        loading="lazy"
+                        className={styles.cellImg}
+                      />
+                    </figure>
+                  )
+                })}
+              </div>
+            </section>
+          )
+        })}
+      </div>
 
-          {/* p3 */}
-          <div className={`${styles.page} ${styles.photoPage}`}>
-            <img src={pic(fotoPages[0].id)} className={styles.pageImg} alt={fotoPages[0].label} />
-            <span className={styles.cap}>{fotoPages[0].label}</span>
-          </div>
-          {/* p4 */}
-          <div className={`${styles.page} ${styles.photoPage}`}>
-            <img src={pic(fotoPages[1].id)} className={styles.pageImg} alt={fotoPages[1].label} />
-            <span className={styles.cap}>{fotoPages[1].label}</span>
-          </div>
-
-          {/* p5 — FEATURES (papel) */}
-          <div className={`${styles.page} ${styles.paper}`}>
-            <div className={styles.paperInner}>
-              <p className={styles.section_n}>Lo que incluye</p>
-              <ul className={styles.featList}>
-                {features.map(([t, d]) => (
-                  <li key={t} className={styles.featItem}>
-                    <span className={styles.featT}>{t}</span>
-                    <span className={styles.featD}>{d}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <span className={styles.folio}>05</span>
-          </div>
-
-          {/* p6 */}
-          <div className={`${styles.page} ${styles.photoPage}`}>
-            <img src={pic(fotoPages[2].id)} className={styles.pageImg} alt={fotoPages[2].label} />
-            <span className={styles.cap}>{fotoPages[2].label}</span>
-          </div>
-          {/* p7 */}
-          <div className={`${styles.page} ${styles.photoPage}`}>
-            <img src={pic(fotoPages[3].id)} className={styles.pageImg} alt={fotoPages[3].label} />
-            <span className={styles.cap}>{fotoPages[3].label}</span>
-          </div>
-          {/* p8 */}
-          <div className={`${styles.page} ${styles.photoPage}`}>
-            <img src={pic(fotoPages[4].id)} className={styles.pageImg} alt={fotoPages[4].label} />
-            <span className={styles.cap}>{fotoPages[4].label}</span>
-          </div>
-
-          {/* p9 — CONTRATAPA con CTA */}
-          <div className={`${styles.page} ${styles.back}`}>
-            <div className={styles.backFill} />
-            <div className={styles.backInner}>
-              <p className={styles.mast}>MUDA</p>
-              <h3 className={styles.backTitle}>¿Reservás<br />tu <em>producción?</em></h3>
-              <p className={styles.backSub}>
-                Contános tu proyecto y armamos la jornada en el estudio.
-              </p>
-              <button className={styles.backCta} onClick={() => navigate('contacto')}>
-                Contactanos →
-              </button>
-              <p className={styles.backTag}>Palermo, Buenos Aires · @muda.agcy</p>
-            </div>
-          </div>
-        </FlipBook>
-
-        <div className={styles.controls}>
-          <button
-            className={`${styles.nav} ${atStart ? styles.navHidden : ''}`}
-            onClick={() => flip(-1)}
-            aria-label="Anterior"
-          >←</button>
-          <span className={styles.counter}>{pad(Math.min(page + 1, totalPages))} / {pad(totalPages)}</span>
-          <button
-            className={`${styles.nav} ${atEnd ? styles.navHidden : ''}`}
-            onClick={() => flip(1)}
-            aria-label="Siguiente"
-          >→</button>
+      {/* ── CTA ── */}
+      <div className={`${styles.cta}`}>
+        <h3 className={styles.ctaTitle}>¿Reservás<br />tu <em>producción?</em></h3>
+        <p className={styles.ctaText}>Contános tu proyecto y armamos la jornada en el estudio.</p>
+        <div className={styles.ctaBtns}>
+          <a
+            className={styles.ctaBtn}
+            href={whatsappLink('¡Hola MUDA! Quiero alquilar el estudio para una producción.')}
+            target="_blank"
+            rel="noopener"
+          >
+            Escribinos por WhatsApp →
+          </a>
+          <button className={styles.ctaGhost} onClick={() => navigate('contacto')}>
+            Ver contacto
+          </button>
         </div>
       </div>
     </section>
