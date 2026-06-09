@@ -20,7 +20,7 @@ const chapters: Chapter[] = [
     kicker: 'Sala blanca',
     desc: 'Sala infinito de cuatro paredes, ideal para campañas de moda, e-commerce, contenido y producciones comerciales.',
     fx: true,
-    photos: ['espacio1_wmgx1f', 'espacio3_wiwpo3', 'espacio2_b7rpbk', 'espacio4_xggrbc'],
+    photos: ['espacio1_wmgx1f', 'espacio3_wiwpo3', 'espacio2_b7rpbk'],
   },
   {
     n: '02',
@@ -32,7 +32,6 @@ const chapters: Chapter[] = [
       'WhatsApp_Image_2026-06-09_at_08.29.49_jj8uy2',
       'WhatsApp_Image_2026-06-09_at_08.29.49_1_uxgvvq',
       'WhatsApp_Image_2026-06-09_at_08.30.07_nvfadc',
-      'WhatsApp_Image_2026-06-09_at_08.30.08_wvno2a',
     ],
   },
   {
@@ -48,65 +47,55 @@ const chapters: Chapter[] = [
   },
 ]
 
-const fxPrefix = (fx: boolean) => (fx ? `${ESTUDIO_FX},` : '')
-const wide = (id: string, fx: boolean) => imgUrl(id, `${fxPrefix(fx)}w_1500,h_950,c_fill,g_auto,q_auto,f_auto`)
-const tall = (id: string, fx: boolean) => imgUrl(id, `${fxPrefix(fx)}w_900,h_1100,c_fill,g_auto,q_auto,f_auto`)
+// Ancho fijo, alto natural → la foto se ve completa, sin recortes
+const pic = (id: string, fx: boolean) =>
+  imgUrl(id, `${fx ? `${ESTUDIO_FX},` : ''}w_1000,q_auto,f_auto`)
 
 export default function Estudio({ navigate }: { navigate: (v: View) => void }) {
   return (
     <section className={styles.section} data-nav="dark">
       {/* ── Encabezado ── */}
       <header className={styles.head}>
-        <p className={`${styles.eyebrow}`}>Palermo · Buenos Aires</p>
-        <h2 className={`${styles.headTitle}`}>El <em>estudio.</em></h2>
-        <p className={`${styles.headText}`}>
+        <p className={styles.eyebrow}>Palermo · Buenos Aires</p>
+        <h2 className={styles.headTitle}>El <em>estudio.</em></h2>
+        <p className={styles.headText}>
           Un espacio pensado para producciones fotográficas, audiovisuales y proyectos
           creativos. Recorrelo por dentro.
         </p>
       </header>
 
-      {/* ── Capítulos ── */}
+      {/* ── Capítulos alternados ── */}
       <div className={styles.mag}>
-        {chapters.map(ch => {
-          const restOdd = (ch.photos.length - 1) % 2 === 1
-          return (
-            <section key={ch.n} className={styles.chapter}>
-              <div className={`${styles.chapterHead}`}>
-                <span className={styles.chapterNum}>{ch.n}</span>
-                <div className={styles.chapterMeta}>
-                  <span className={styles.chapterKicker}>{ch.kicker}</span>
-                  <h3 className={styles.chapterTitle}>{ch.title}</h3>
-                  <p className={styles.chapterDesc}>{ch.desc}</p>
-                </div>
-              </div>
+        {chapters.map((ch, idx) => (
+          <section
+            key={ch.n}
+            className={`${styles.chapter} ${idx % 2 === 1 ? styles.reverse : ''}`}
+          >
+            <div className={styles.text}>
+              <span className={styles.chapterNum}>{ch.n}</span>
+              <span className={styles.chapterKicker}>{ch.kicker}</span>
+              <h3 className={styles.chapterTitle}>{ch.title}</h3>
+              <p className={styles.chapterDesc}>{ch.desc}</p>
+            </div>
 
-              <div className={styles.grid}>
-                {ch.photos.map((id, i) => {
-                  const len = ch.photos.length
-                  // con 2 fotos → ambas verticales lado a lado; con 3+ → 1ra grande
-                  const full = (i === 0 && len >= 3) || (i === len - 1 && len >= 4 && restOdd)
-                  return (
-                    <figure
-                      key={id}
-                      className={`${styles.cell} ${full ? styles.full : ''}`}
-                    >
-                      <img
-                        src={full ? wide(id, ch.fx) : tall(id, ch.fx)}
-                        alt={`Estudio MUDA — ${ch.title}`}
-                        loading="lazy"
-                        className={styles.cellImg}
-                      />
-                    </figure>
-                  )
-                })}
-              </div>
-            </section>
-          )
-        })}
+            <div className={`${styles.photos} ${ch.photos.length === 1 ? styles.single : ''}`}>
+              {ch.photos.map(id => (
+                <figure key={id} className={styles.cell}>
+                  <img
+                    src={pic(id, ch.fx)}
+                    alt={`Estudio MUDA — ${ch.title}`}
+                    loading="lazy"
+                    className={styles.cellImg}
+                  />
+                </figure>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
 
       {/* ── CTA ── */}
-      <div className={`${styles.cta}`}>
+      <div className={styles.cta}>
         <h3 className={styles.ctaTitle}>¿Reservás<br />tu <em>producción?</em></h3>
         <p className={styles.ctaText}>Contános tu proyecto y armamos la jornada en el estudio.</p>
         <div className={styles.ctaBtns}>
