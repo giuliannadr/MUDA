@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { supabase, TALENTO_VACIO, type Talento, type Categoria, type Solicitud } from './lib/supabase'
+import { supabase, TALENTO_VACIO, type Talento, type Categoria, type Solicitud, type Produccion, PRODUCCION_VACIA } from './lib/supabase'
 import { uploadImage, imgUrl } from './lib/cloudinary'
 
 const CATS: { key: Categoria; label: string; desc: string }[] = [
@@ -388,16 +388,189 @@ function Wizard({
   )
 }
 
+/* ── Wizard Producción ─────────────────────────────────────── */
+const TIPOS_PROD = [
+  'Producción de fotos',
+  'Dirección creativa visual',
+  'Moda & Editorial',
+  'Campaña',
+  'Videoclip',
+  'E-commerce',
+  'Contenido',
+  'Evento',
+]
+
+function WizardProduccion({
+  initial, onSave, onCancel,
+}: {
+  initial: Omit<Produccion, 'id' | 'created_at'>
+  onSave: (d: Omit<Produccion, 'id' | 'created_at'>) => Promise<void>
+  onCancel: () => void
+}) {
+  const [f, setF]       = useState(initial)
+  const [saving, setSaving] = useState(false)
+  const [galBusy, setGalBusy] = useState(0)
+  const galeriaRef = useRef<HTMLInputElement>(null)
+
+  const set = (k: keyof typeof f) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const val = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value
+      setF(p => ({ ...p, [k]: val }))
+    }
+
+  const submit = async () => {
+    setSaving(true)
+    await onSave(f)
+    setSaving(false)
+  }
+
+  const addGaleria = async (file: File) => {
+    if ((f.images ?? []).length >= 15) return
+    const u = await uploadImage(file)
+    setF(p => ({ ...p, images: [...(p.images ?? []), u] }))
+  }
+  const removeGaleria = (i: number) =>
+    setF(p => ({ ...p, images: (p.images ?? []).filter((_, idx) => idx !== i) }))
+
+  return (
+    <div className="max-w-[680px] mx-auto px-8 pt-12 pb-16">
+      <div className="flex flex-col gap-7 animate-fadeUp">
+        <h2 className="font-display italic text-[2.2rem] font-light text-ink m-0">Datos del proyecto</h2>
+
+        <div className="flex flex-col gap-2">
+          <label className={fieldLabel}>Categoría</label>
+          <div className="grid grid-cols-2 gap-2.5">
+            {([['produccion', 'Producción', 'Foto, video, dirección creativa'], ['evento', 'Evento', 'Organización de eventos']] as const).map(([key, label, desc]) => (
+              <button key={key} type="button"
+                onClick={() => setF(p => ({ ...p, categoria: key }))}
+                className={`flex flex-col items-start gap-1 px-[1.1rem] py-4 bg-white border-[1.5px] cursor-pointer text-left transition-all
+                  ${f.categoria === key ? 'border-burgundy bg-burgundy/5' : 'border-ink/12 hover:border-burgundy/30'}`}
+              >
+                <span className={`font-display italic text-base ${f.categoria === key ? 'text-burgundy' : 'text-ink'}`}>{label}</span>
+                <span className="font-mono text-[0.52rem] tracking-[0.08em] text-ink/35">{desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-[1fr_120px] gap-3">
+          <div className="flex flex-col gap-2">
+            <label className={fieldLabel}>Título del proyecto</label>
+            <input className={bigInput} value={f.title} onChange={set('title')}
+              placeholder="Ej: Editorial Otoño" autoFocus />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className={fieldLabel}>Año</label>
+            <input className={bigInput} value={f.year} onChange={set('year')} placeholder="2026" />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className={fieldLabel}>Tipo (servicio / formato)</label>
+          <div className="grid grid-cols-4 gap-2">
+            {TIPOS_PROD.map(t => (
+              <button key={t} type="button"
+                onClick={() => setF(p => ({ ...p, tipo: t }))}
+                className={`font-mono text-[0.52rem] tracking-[0.08em] uppercase px-3 py-2.5 border cursor-pointer text-left transition-all
+                  ${f.tipo === t ? 'text-burgundy border-burgundy/30 bg-burgundy/5' : 'text-ink/38 border-ink/12 hover:border-burgundy/30'}`}>
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 cursor-pointer font-mono text-[0.58rem] tracking-[0.12em] uppercase text-ink/50">
+            <input type="checkbox" checked={f.fx} onChange={set('fx')} className="accent-[var(--burgundy)]" />
+            Aplicar filtro visual (FX Studio)
+          </label>
+        </div>
+
+        {/* Portada */}
+        <div className="flex flex-col gap-2">
+          <label className={fieldLabel}>Foto de portada</label>
+          <div className="max-w-[240px]">
+            <FotoUpload url={f.cover} onUrl={u => setF(p => ({ ...p, cover: u }))} />
+          </div>
+        </div>
+
+        {/* Galería */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-4 mb-1">
+            <label className={fieldLabel}>
+              Galería <span className="text-ink/25 normal-case tracking-normal ml-2">{(f.images ?? []).length}/15 fotos</span>
+            </label>
+            {(f.images ?? []).length < 15 && (
+              <button type="button" disabled={galBusy > 0} onClick={() => galeriaRef.current?.click()}
+                className="font-mono text-[0.55rem] tracking-[0.12em] uppercase text-burgundy bg-transparent border border-burgundy/25 px-3 py-1.5 cursor-pointer transition-all hover:bg-burgundy hover:text-white disabled:opacity-40">
+                + Agregar
+              </button>
+            )}
+            {galBusy > 0 && (
+              <span className="flex items-center gap-2 font-mono text-[0.55rem] tracking-[0.14em] uppercase text-terra">
+                <span className="w-3 h-3 border-2 border-terra/30 border-t-terra rounded-full animate-spin" />
+                Subiendo {galBusy}…
+              </span>
+            )}
+            <input ref={galeriaRef} type="file" accept="image/*" multiple hidden
+              onChange={async e => {
+                const files = Array.from(e.target.files ?? []).slice(0, 15 - (f.images ?? []).length)
+                setGalBusy(files.length)
+                for (const file of files) { await addGaleria(file); setGalBusy(n => n - 1) }
+                e.target.value = ''
+              }} />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(f.images ?? []).map((u, i) => (
+              <div key={i} className="relative w-[90px] h-[112px] group">
+                <img src={imgUrl(u, 'w_160,h_200,c_fill,q_auto')} alt="" className="w-full h-full object-cover" />
+                <button type="button" onClick={() => removeGaleria(i)}
+                  className="absolute top-[3px] right-[3px] w-[22px] h-[22px] bg-ink/60 text-white border-none text-[0.55rem] cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  ✕
+                </button>
+              </div>
+            ))}
+            {(f.images ?? []).length < 15 && (
+              <div onClick={() => galeriaRef.current?.click()}
+                className="w-[90px] h-[112px] border-[1.5px] border-dashed border-ink/15 flex items-center justify-center text-[1.4rem] text-ink/20 cursor-pointer transition-all hover:border-burgundy hover:text-burgundy">
+                +
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Navegación */}
+      <div className="flex justify-between items-center mt-12 pt-8 border-t border-ink/8">
+        <button type="button" onClick={onCancel}
+          className="font-mono text-[0.62rem] tracking-[0.14em] uppercase text-ink/38 bg-transparent border-none py-3.5 cursor-pointer transition-colors hover:text-ink">
+          Cancelar
+        </button>
+        <button type="button" onClick={submit} disabled={saving || !f.title || !f.cover}
+          className="font-mono text-[0.65rem] tracking-[0.18em] uppercase text-cream-2 bg-burgundy border-none px-9 py-3.5 cursor-pointer transition-colors hover:bg-ink disabled:opacity-40 disabled:cursor-not-allowed">
+          {saving ? 'Guardando…' : '✓ Guardar'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /* ── Admin principal ───────────────────────────────────────── */
 export default function Admin() {
   const [session, setSession]   = useState<boolean | null>(null)
   const [talentos, setTalentos] = useState<Talento[]>([])
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([])
-  const [tab, setTab]           = useState<'talentos' | 'solicitudes'>('talentos')
+  const [tab, setTab]           = useState<'talentos' | 'solicitudes' | 'producciones'>('talentos')
   const [editing, setEditing]   = useState<Talento | null>(null)
   const [adding, setAdding]     = useState(false)
   const [filter, setFilter]     = useState<string>('todos')
   const [loading, setLoading]   = useState(true)
+
+  // Producciones state
+  const [producciones, setProducciones] = useState<Produccion[]>([])
+  const [editingProd, setEditingProd]   = useState<Produccion | null>(null)
+  const [addingProd, setAddingProd]     = useState(false)
+  const [filterProd, setFilterProd]     = useState<string>('todos')
 
   const ROL_POR_CAT: Record<Categoria, string> = {
     modelos: 'Modelo', fotografos: 'Fotógrafx', maquilladores: 'Maquilladorx',
@@ -409,12 +582,14 @@ export default function Admin() {
   }, [])
 
   const fetchAll = async () => {
-    const [t, s] = await Promise.all([
+    const [t, s, p] = await Promise.all([
       supabase.from('talentos').select('*').order('nombre'),
       supabase.from('solicitudes').select('*').order('created_at', { ascending: false }),
+      supabase.from('producciones').select('*').order('created_at', { ascending: false }),
     ])
     setTalentos(t.data ?? [])
     setSolicitudes(s.data ?? [])
+    setProducciones(p.data ?? [])
     setLoading(false)
   }
   useEffect(() => { if (session) fetchAll() }, [session])
@@ -445,12 +620,25 @@ export default function Admin() {
     fetchAll()
   }
 
+  const saveProd = async (data: Omit<Produccion, 'id' | 'created_at'>) => {
+    if (editingProd) await supabase.from('producciones').update(data).eq('id', editingProd.id)
+    else             await supabase.from('producciones').insert(data)
+    setEditingProd(null); setAddingProd(false); fetchAll()
+  }
+
+  const removeProd = async (id: string) => {
+    if (!confirm('¿Eliminar esta producción/evento?')) return
+    await supabase.from('producciones').delete().eq('id', id)
+    fetchAll()
+  }
+
   if (session === null) return null
   if (!session) return <Login onLogin={() => setSession(true)} />
 
   const lista = filter === 'todos' ? talentos : talentos.filter(t => t.categoria === filter)
+  const listaProd = filterProd === 'todos' ? producciones : producciones.filter(p => p.categoria === filterProd)
 
-  /* ── Wizard ────────────────────────────────────────── */
+  /* ── Wizard Talento ─────────────────────────────────── */
   if (adding || editing) {
     return (
       <div className="min-h-screen bg-cream">
@@ -469,6 +657,25 @@ export default function Admin() {
     )
   }
 
+  /* ── Wizard Producción ─────────────────────────────── */
+  if (addingProd || editingProd) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <div className="flex items-center gap-8 px-8 py-4 bg-burgundy">
+          <span className="font-display italic text-[1.1rem] text-cream-2">MUDA Admin</span>
+          <span className="font-mono text-[0.58rem] tracking-[0.14em] uppercase text-cream-2/45">
+            {editingProd ? `Editando — ${editingProd.title}` : 'Nueva producción / evento'}
+          </span>
+        </div>
+        <WizardProduccion
+          initial={editingProd ?? PRODUCCION_VACIA}
+          onSave={saveProd}
+          onCancel={() => { setEditingProd(null); setAddingProd(false) }}
+        />
+      </div>
+    )
+  }
+
   /* ── Lista ─────────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-cream">
@@ -482,6 +689,11 @@ export default function Admin() {
               className={`font-mono text-[0.58rem] tracking-[0.14em] uppercase px-3 py-1.5 cursor-pointer transition-colors
                 ${tab === 'talentos' ? 'text-cream-2 border-b-2 border-terra' : 'text-cream-2/45 border-b-2 border-transparent hover:text-cream-2/80'}`}>
               Talentos
+            </button>
+            <button onClick={() => setTab('producciones')}
+              className={`font-mono text-[0.58rem] tracking-[0.14em] uppercase px-3 py-1.5 cursor-pointer transition-colors
+                ${tab === 'producciones' ? 'text-cream-2 border-b-2 border-terra' : 'text-cream-2/45 border-b-2 border-transparent hover:text-cream-2/80'}`}>
+              Producciones
             </button>
             <button onClick={() => setTab('solicitudes')}
               className={`relative font-mono text-[0.58rem] tracking-[0.14em] uppercase px-3 py-1.5 cursor-pointer transition-colors
@@ -544,6 +756,63 @@ export default function Admin() {
                       Editar
                     </button>
                     <button onClick={() => remove(t.id)}
+                      className="w-[26px] h-[26px] bg-white text-ink/40 border-none cursor-pointer text-[0.65rem] transition-colors hover:bg-[#c0392b] hover:text-white">
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      ) : tab === 'producciones' ? (
+        /* ── Producciones ──────────────────────────────────── */
+        <>
+          <div className="flex items-center justify-between px-8 py-5 border-b border-ink/8">
+            <div className="flex gap-1">
+              {['todos', 'produccion', 'evento'].map(c => (
+                <button key={c} onClick={() => setFilterProd(c)}
+                  className={`font-mono text-[0.58rem] tracking-[0.12em] uppercase px-4 py-1.5 border cursor-pointer transition-all
+                    ${filterProd === c ? 'text-burgundy border-burgundy/30' : 'text-ink/38 border-transparent hover:text-ink'}`}>
+                  {c === 'todos' ? 'Todos' : c === 'produccion' ? 'Producciones' : 'Eventos'}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setAddingProd(true)}
+              className="font-mono text-[0.62rem] tracking-[0.16em] uppercase text-cream-2 bg-burgundy border-none px-6 py-2.5 cursor-pointer transition-colors hover:bg-ink">
+              + Nueva producción / evento
+            </button>
+          </div>
+
+          {loading ? (
+            <p className="text-center py-24 font-mono text-[0.62rem] tracking-[0.16em] uppercase text-ink/22">Cargando…</p>
+          ) : listaProd.length === 0 ? (
+            <p className="text-center py-24 font-mono text-[0.62rem] tracking-[0.16em] uppercase text-ink/22">No hay producciones todavía.</p>
+          ) : (
+            <div className="grid [grid-template-columns:repeat(auto-fill,minmax(200px,1fr))] gap-px bg-ink/8 p-px">
+              {listaProd.map(p => (
+                <div key={p.id} className="bg-cream relative group">
+                  <div className="w-full aspect-[3/4] overflow-hidden bg-ink/5">
+                    {p.cover
+                      ? <img src={imgUrl(p.cover, 'w_300,h_380,c_fill,q_auto')} alt={p.title}
+                          className="w-full h-full object-cover transition-transform duration-[400ms] group-hover:scale-[1.03]" />
+                      : <div className="w-full h-full flex items-center justify-center font-display italic text-[3rem] text-burgundy/25">{p.title[0]}</div>}
+                  </div>
+                  <div className="px-[0.9rem] pt-3 pb-2.5">
+                    <p className="font-display italic text-base text-ink">{p.title}</p>
+                    <p className="font-mono text-[0.55rem] tracking-[0.12em] uppercase text-terra mt-0.5">
+                      {p.tipo} · {p.year}
+                    </p>
+                    <p className="font-mono text-[0.48rem] tracking-[0.1em] uppercase text-ink/30 mt-0.5">
+                      {p.categoria === 'produccion' ? 'Producción' : 'Evento'} · {(p.images ?? []).length} fotos
+                    </p>
+                  </div>
+                  <div className="absolute top-2.5 right-2.5 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => setEditingProd(p)}
+                      className="font-mono text-[0.52rem] tracking-[0.1em] uppercase bg-white text-burgundy border-none px-2.5 py-1.5 cursor-pointer transition-colors hover:bg-burgundy hover:text-white">
+                      Editar
+                    </button>
+                    <button onClick={() => removeProd(p.id)}
                       className="w-[26px] h-[26px] bg-white text-ink/40 border-none cursor-pointer text-[0.65rem] transition-colors hover:bg-[#c0392b] hover:text-white">
                       ✕
                     </button>

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import styles from './Eventos.module.css'
+import Portfolio from './Portfolio'
 
 const includes = [
   'Conceptualización del evento',
@@ -59,6 +60,12 @@ export default function Eventos() {
               <div className={styles.accent} />
             </div>
           </div>
+        </div>
+
+        {/* Galería de eventos realizados */}
+        <div className={styles.eventos}>
+          <h3 className={`${styles.eventosH} reveal`}>Eventos <em>realizados.</em></h3>
+          <Portfolio categoria="evento" emptyText="Pronto, nuestros eventos…" />
         </div>
       </div>
     </section>
