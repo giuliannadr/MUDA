@@ -11,6 +11,12 @@ const ROL_LABEL: Record<string, string> = {
   modelos: 'MODELO', fotografos: 'FOTÓGRAFX', maquilladores: 'MAQUILLADORX',
 }
 
+const SERVICIOS = [
+  { n: '01', view: 'produccion' as View, word: 'Producción & Dirección', sub: 'Foto y video + dirección creativa: shooting, locación, arte, estilismo y concepto visual.' },
+  { n: '02', view: 'agencia'    as View, word: 'Agencia de Talentos',     sub: 'Modelxs, fotógrafxs, maquilladorxs y creativxs para contratar de forma independiente.' },
+  { n: '03', view: 'eventos'    as View, word: 'Organización de Eventos', sub: 'Experiencias visuales y conceptuales, de la idea inicial a la ejecución.' },
+]
+
 type Props = { navigate: (v: View) => void; onCurtainChange?: (open: boolean) => void }
 
 export default function Inicio({ navigate, onCurtainChange }: Props) {
@@ -18,6 +24,7 @@ export default function Inicio({ navigate, onCurtainChange }: Props) {
   const botRef = useRef<HTMLDivElement>(null)
   const [talentos, setTalentos] = useState<Talento[]>([])
   const [selected, setSelected] = useState<Talento | null>(null)
+  const [svActive, setSvActive] = useState(0)
 
   // Trae hasta 6 talentos para la tira de Agencia
   useEffect(() => {
@@ -184,45 +191,37 @@ export default function Inicio({ navigate, onCurtainChange }: Props) {
           </div>
         </div>
 
-        {/* ══ SERVICIOS — marquesinas editoriales ════════════ */}
+        {/* ══ SERVICIOS — índice + panel ═════════════════════ */}
         <section className={styles.servicios} data-nav="light">
           <div className={styles.serviciosHead}>
             <p className={styles.secLabel}>02 — Servicios</p>
             <h2 className={styles.serviciosH}>Lo que<br /><em>hacemos.</em></h2>
-            <p className={styles.serviciosHint}>↗ Pasá por cada cinta</p>
           </div>
 
-          <div className={styles.marqRows}>
-            {([
-              { n: '01', view: 'produccion' as const, word: 'Producción & Dirección', sub: 'Foto y video + dirección creativa: shooting, locación, arte, estilismo y concepto visual.' },
-              { n: '02', view: 'agencia'    as const, word: 'Agencia de Talentos',     sub: 'Modelxs, fotógrafxs, maquilladorxs y creativxs para contratar de forma independiente.' },
-              { n: '03', view: 'eventos'    as const, word: 'Eventos',                 sub: 'Experiencias visuales y conceptuales, de la idea inicial a la ejecución.' },
-            ]).map((s, i) => (
-              <div
-                key={s.n}
-                className={styles.marqRow}
-                style={{ '--speed': `${26 + i * 7}s` } as React.CSSProperties}
-                onClick={() => navigate(s.view)}
-              >
-                <div className={styles.marqTrack}>
-                  {[0, 1].map(copy => (
-                    <div key={copy} className={styles.marqGroup} aria-hidden={copy === 1}>
-                      {Array.from({ length: 4 }).map((_, k) => (
-                        <span key={k} className={styles.marqUnit}>
-                          <span className={styles.marqWord}>{s.word}</span>
-                          <span className={styles.marqStar}>☆</span>
-                        </span>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-                <div className={styles.marqMeta}>
-                  <span className={styles.marqNum}>{s.n}</span>
-                  <p className={styles.marqSub}>{s.sub}</p>
-                  <span className={styles.marqGo}>Entrar →</span>
-                </div>
-              </div>
-            ))}
+          <div className={styles.svLayout}>
+            <ul className={styles.svList}>
+              {SERVICIOS.map((s, i) => (
+                <li key={s.n}>
+                  <button
+                    className={`${styles.svItem} ${svActive === i ? styles.svItemOn : ''}`}
+                    onMouseEnter={() => setSvActive(i)}
+                    onFocus={() => setSvActive(i)}
+                    onClick={() => navigate(s.view)}
+                  >
+                    <span className={styles.svNum}>{s.n}</span>
+                    <span className={styles.svTitle}>{s.word}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            <aside className={styles.svPanel}>
+              <span className={styles.svPanelStar}>☆</span>
+              <p key={svActive} className={styles.svPanelDesc}>{SERVICIOS[svActive].sub}</p>
+              <button className={styles.svPanelGo} onClick={() => navigate(SERVICIOS[svActive].view)}>
+                Entrar →
+              </button>
+            </aside>
           </div>
         </section>
 

@@ -399,110 +399,97 @@
   color: var(--burgundy);
 }
 
-.serviciosHint {
+/* ── Índice + panel ── */
+.svLayout {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: stretch;
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 5vw, 5rem) clamp(3.5rem, 6vw, 5.5rem);
+}
+
+.svList { list-style: none; }
+.svItem {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: clamp(1.2rem, 2.5vw, 2rem);
+  padding: clamp(1.2rem, 2.4vw, 1.8rem) 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid rgba(10,9,8,0.12);
+  text-align: left;
+  cursor: pointer;
+}
+.svList li:first-child .svItem { border-top: 1px solid rgba(10,9,8,0.12); }
+.svNum {
   font-family: var(--f-mono);
   font-size: 0.6rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  letter-spacing: 0.2em;
   color: rgba(10,9,8,0.35);
-}
-
-/* ── Marquesinas editoriales ── */
-.marqRows { display: flex; flex-direction: column; }
-
-.marqRow {
-  position: relative;
-  overflow: hidden;
-  padding: clamp(1.6rem, 3.2vw, 2.8rem) 0 clamp(2.6rem, 4.4vw, 3.8rem);
-  border-bottom: 1px solid rgba(10,9,8,0.1);
-  cursor: pointer;
-  transition: background 0.45s var(--ease-expo);
-}
-.marqRow:hover { background: var(--burgundy); }
-
-/* cinta en movimiento */
-.marqTrack {
-  display: flex;
-  width: max-content;
-  animation: marqSlide var(--speed, 30s) linear infinite;
-}
-.marqRow:hover .marqTrack { animation-play-state: paused; }
-@keyframes marqSlide {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-.marqGroup {
-  display: flex;
   flex-shrink: 0;
+  transition: color 0.3s;
 }
-.marqUnit {
-  display: flex;
-  align-items: baseline;
-  gap: clamp(1.6rem, 3vw, 3rem);
-  padding-right: clamp(1.6rem, 3vw, 3rem);
-  white-space: nowrap;
-}
-/* tipografía outline estilo editorial → se rellena al hover */
-.marqWord {
+.svItemOn .svNum { color: var(--terra); }
+.svTitle {
   font-family: var(--f-display);
   font-weight: 300;
-  font-size: clamp(3.2rem, 8.5vw, 7.5rem);
-  line-height: 1;
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(10,9,8,0.55);
-  transition: color 0.4s, -webkit-text-stroke-color 0.4s;
+  font-size: clamp(1.8rem, 3.6vw, 3.2rem);
+  line-height: 1.05;
+  color: rgba(10,9,8,0.32);
+  transition: color 0.35s, transform 0.45s var(--ease-expo);
 }
-.marqRow:hover .marqWord {
+.svItemOn .svTitle {
   font-style: italic;
-  color: var(--cream);
-  -webkit-text-stroke-color: transparent;
+  color: var(--burgundy);
+  transform: translateX(0.4rem);
 }
-.marqStar {
-  font-size: clamp(1.6rem, 3.4vw, 3rem);
-  color: var(--terra);
-  transition: transform 0.6s var(--ease-expo);
-}
-.marqRow:hover .marqStar { transform: rotate(180deg); }
 
-/* meta: número + descripción + entrar */
-.marqMeta {
-  position: absolute;
-  left: clamp(1.5rem, 5vw, 5rem);
-  right: clamp(1.5rem, 5vw, 5rem);
-  bottom: 0.85rem;
+/* panel fijo a la derecha: descripción del servicio activo */
+.svPanel {
+  position: relative;
+  background: var(--burgundy);
+  padding: clamp(2rem, 3.5vw, 3rem);
   display: flex;
-  align-items: baseline;
-  gap: 1.1rem;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 300px;
+  overflow: hidden;
 }
-.marqNum {
-  font-family: var(--f-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.2em;
+.svPanelStar {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.6rem;
+  font-size: 1.5rem;
   color: var(--terra);
-  flex-shrink: 0;
 }
-.marqSub {
+.svPanelDesc {
   font-family: var(--f-display);
-  font-size: clamp(0.82rem, 1.2vw, 0.95rem);
-  line-height: 1.45;
-  color: rgba(10,9,8,0.5);
-  transition: color 0.4s;
-  max-width: 64ch;
+  font-size: clamp(1.1rem, 1.7vw, 1.45rem);
+  font-weight: 300;
+  line-height: 1.55;
+  color: rgba(240,234,216,0.88);
+  margin-bottom: 1.8rem;
+  animation: svFade 0.45s var(--ease-expo);
 }
-.marqRow:hover .marqSub { color: rgba(240,234,216,0.78); }
-.marqGo {
-  margin-left: auto;
-  flex-shrink: 0;
+@keyframes svFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.svPanelGo {
+  align-self: flex-start;
   font-family: var(--f-mono);
-  font-size: 0.58rem;
+  font-size: 0.62rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--terra);
-  opacity: 0;
-  transform: translateX(-8px);
-  transition: opacity 0.35s, transform 0.4s var(--ease-expo);
+  color: var(--cream);
+  background: none;
+  border: 1px solid rgba(240,234,216,0.35);
+  padding: 0.8rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
-.marqRow:hover .marqGo { opacity: 1; transform: translateX(0); }
+.svPanelGo:hover { background: var(--cream); color: var(--burgundy); border-color: var(--cream); }
 
 .outlineBtn {
   background: none;
@@ -917,11 +904,9 @@
   .decoNum, .decoNumLight { display: none; }
 
   .serviciosHead { flex-direction: column; align-items: flex-start; gap: 0.8rem; padding: 4rem 2rem 2rem; }
-  .serviciosHint { display: none; }
-  /* en touch no hay hover: la cinta queda outline y la meta siempre visible */
-  .marqRow { padding-bottom: 4.4rem; }
-  .marqGo { opacity: 1; transform: none; }
-  .marqMeta { flex-wrap: wrap; gap: 0.5rem 1rem; bottom: 1.1rem; }
+  /* en touch: lista arriba, panel debajo */
+  .svLayout { grid-template-columns: 1fr; gap: 1.8rem; padding: 2rem 2rem 3.5rem; }
+  .svPanel { min-height: 0; padding: 1.8rem; }
 
   .eventos { min-height: auto; }
   .eventosOverlay { padding: 4rem 2rem; }
@@ -962,7 +947,8 @@
 
   .agenciaStrip { grid-template-columns: repeat(2, 1fr); }
   .serviciosHead { padding: 3rem 1.5rem 1.8rem; }
-  .marqWord { font-size: clamp(2.6rem, 13vw, 3.4rem); }
+  .svLayout { padding: 1.6rem 1.5rem 3rem; }
+  .svTitle { font-size: clamp(1.5rem, 7.5vw, 2rem); }
   .agencia { padding: 4rem 1.5rem 3rem; }
   .quienesText { padding: 3rem 1.5rem; }
   .estudioPanel { padding: 3rem 1.5rem; }
