@@ -12,9 +12,9 @@ const ROL_LABEL: Record<string, string> = {
 }
 
 const SERVICIOS = [
-  { n: '01', view: 'produccion' as View, word: 'Producción & Dirección', sub: 'Foto y video + dirección creativa: shooting, locación, arte, estilismo y concepto visual.' },
-  { n: '02', view: 'agencia'    as View, word: 'Agencia de Talentos',     sub: 'Modelxs, fotógrafxs, maquilladorxs y creativxs para contratar de forma independiente.' },
-  { n: '03', view: 'eventos'    as View, word: 'Organización de Eventos', sub: 'Experiencias visuales y conceptuales, de la idea inicial a la ejecución.' },
+  { n: '01', view: 'produccion' as View, kicker: 'Foto · Video · Dirección', word: 'Producción', sub: 'Foto y video + dirección creativa: shooting, locación, arte, estilismo y concepto visual.', fallback: 'espacio1_wmgx1f' },
+  { n: '02', view: 'agencia'    as View, kicker: 'Base de talentos',         word: 'Agencia',    sub: 'Modelxs, fotógrafxs, maquilladorxs y creativxs para contratar de forma independiente.', fallback: 'espacio2_b7rpbk' },
+  { n: '03', view: 'eventos'    as View, kicker: 'Experiencias',             word: 'Eventos',    sub: 'Experiencias visuales y conceptuales, de la idea inicial a la ejecución.', fallback: 'WhatsApp_Image_2026-06-09_at_08.29.49_jj8uy2' },
 ]
 
 type Props = { navigate: (v: View) => void; onCurtainChange?: (open: boolean) => void }
@@ -25,6 +25,23 @@ export default function Inicio({ navigate, onCurtainChange }: Props) {
   const [talentos, setTalentos] = useState<Talento[]>([])
   const [selected, setSelected] = useState<Talento | null>(null)
   const [svActive, setSvActive] = useState(0)
+  // Portadas reales para el tríptico (última producción / talento / último evento)
+  const [svCovers, setSvCovers] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    supabase.from('producciones')
+      .select('categoria, cover')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        if (!data) return
+        const covers: Record<string, string> = {}
+        const prod = data.find(p => p.categoria === 'produccion')
+        const ev = data.find(p => p.categoria === 'evento')
+        if (prod?.cover) covers.produccion = prod.cover
+        if (ev?.cover) covers.eventos = ev.cover
+        setSvCovers(covers)
+      })
+  }, [])
 
   // Trae hasta 6 talentos para la tira de Agencia
   useEffect(() => {
@@ -198,30 +215,38 @@ export default function Inicio({ navigate, onCurtainChange }: Props) {
             <h2 className={styles.serviciosH}>Lo que<br /><em>hacemos.</em></h2>
           </div>
 
-          <div className={styles.svLayout}>
-            <ul className={styles.svList}>
-              {SERVICIOS.map((s, i) => (
-                <li key={s.n}>
-                  <button
-                    className={`${styles.svItem} ${svActive === i ? styles.svItemOn : ''}`}
-                    onMouseEnter={() => setSvActive(i)}
-                    onFocus={() => setSvActive(i)}
-                    onClick={() => navigate(s.view)}
-                  >
-                    <span className={styles.svNum}>{s.n}</span>
-                    <span className={styles.svTitle}>{s.word}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-
-            <aside className={styles.svPanel}>
-              <span className={styles.svPanelStar}>☆</span>
-              <p key={svActive} className={styles.svPanelDesc}>{SERVICIOS[svActive].sub}</p>
-              <button className={styles.svPanelGo} onClick={() => navigate(SERVICIOS[svActive].view)}>
-                Entrar →
-              </button>
-            </aside>
+          {/* Tríptico editorial: cada servicio es una lámina con foto real */}
+          <div className={styles.svTriptych}>
+            {SERVICIOS.map((s, i) => {
+              const coverId =
+                s.view === 'agencia'
+                  ? (talentos[0]?.portada_1 || s.fallback)
+                  : (svCovers[s.view] || s.fallback)
+              return (
+                <article
+                  key={s.n}
+                  className={`${styles.svPanelT} ${svActive === i ? styles.svPanelTOn : ''}`}
+                  onMouseEnter={() => setSvActive(i)}
+                  onClick={() => navigate(s.view)}
+                >
+                  <img
+                    className={styles.svPanelImg}
+                    src={imgUrl(coverId, 'w_900,h_1200,c_fill,g_auto,q_auto,f_auto')}
+                    alt={s.word}
+                    loading="lazy"
+                  />
+                  <div className={styles.svShade} />
+                  <span className={styles.svTNum}>{s.n}</span>
+                  <span className={styles.svTStar}>☆</span>
+                  <div className={styles.svTBottom}>
+                    <p className={styles.svTKicker}>{s.kicker}</p>
+                    <h3 className={styles.svTTitle}>{s.word}</h3>
+                    <p className={styles.svTDesc}>{s.sub}</p>
+                    <span className={styles.svTGo}>Entrar →</span>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         </section>
 

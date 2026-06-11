@@ -399,97 +399,112 @@
   color: var(--burgundy);
 }
 
-/* ── Índice + panel ── */
-.svLayout {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: clamp(2rem, 5vw, 5rem);
-  align-items: stretch;
-  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 5vw, 5rem) clamp(3.5rem, 6vw, 5.5rem);
-}
-
-.svList { list-style: none; }
-.svItem {
-  width: 100%;
+/* ── Tríptico editorial ── */
+.svTriptych {
   display: flex;
-  align-items: baseline;
-  gap: clamp(1.2rem, 2.5vw, 2rem);
-  padding: clamp(1.2rem, 2.4vw, 1.8rem) 0;
-  background: none;
-  border: 0;
-  border-bottom: 1px solid rgba(10,9,8,0.12);
-  text-align: left;
-  cursor: pointer;
-}
-.svList li:first-child .svItem { border-top: 1px solid rgba(10,9,8,0.12); }
-.svNum {
-  font-family: var(--f-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.2em;
-  color: rgba(10,9,8,0.35);
-  flex-shrink: 0;
-  transition: color 0.3s;
-}
-.svItemOn .svNum { color: var(--terra); }
-.svTitle {
-  font-family: var(--f-display);
-  font-weight: 300;
-  font-size: clamp(1.8rem, 3.6vw, 3.2rem);
-  line-height: 1.05;
-  color: rgba(10,9,8,0.32);
-  transition: color 0.35s, transform 0.45s var(--ease-expo);
-}
-.svItemOn .svTitle {
-  font-style: italic;
-  color: var(--burgundy);
-  transform: translateX(0.4rem);
+  gap: clamp(0.5rem, 1vw, 0.9rem);
+  padding: clamp(2rem, 4vw, 3.5rem) clamp(1.5rem, 5vw, 5rem) clamp(3.5rem, 6vw, 5.5rem);
+  height: clamp(480px, 74vh, 680px);
 }
 
-/* panel fijo a la derecha: descripción del servicio activo */
-.svPanel {
+.svPanelT {
   position: relative;
-  background: var(--burgundy);
-  padding: clamp(2rem, 3.5vw, 3rem);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  min-height: 300px;
+  flex: 1;
   overflow: hidden;
+  cursor: pointer;
+  background: #14100e;
+  transition: flex 0.7s var(--ease-expo);
 }
-.svPanelStar {
+.svPanelTOn { flex: 2.1; }
+
+.svPanelImg {
   position: absolute;
-  top: 1.4rem;
-  right: 1.6rem;
-  font-size: 1.5rem;
-  color: var(--terra);
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: saturate(0.85);
+  transition: filter 0.6s, transform 1.1s var(--ease-expo);
 }
-.svPanelDesc {
-  font-family: var(--f-display);
-  font-size: clamp(1.1rem, 1.7vw, 1.45rem);
-  font-weight: 300;
-  line-height: 1.55;
-  color: rgba(240,234,216,0.88);
-  margin-bottom: 1.8rem;
-  animation: svFade 0.45s var(--ease-expo);
+.svPanelTOn .svPanelImg { filter: saturate(1); transform: scale(1.04); }
+
+.svShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10,9,8,0.85) 0%, rgba(10,9,8,0.18) 48%, rgba(10,9,8,0.32) 100%);
+  pointer-events: none;
 }
-@keyframes svFade {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.svPanelGo {
-  align-self: flex-start;
+
+.svTNum {
+  position: absolute;
+  top: 1.3rem; left: 1.4rem;
   font-family: var(--f-mono);
   font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: rgba(240,234,216,0.8);
+}
+.svTStar {
+  position: absolute;
+  top: 1.15rem; right: 1.3rem;
+  font-size: 1.1rem;
+  color: var(--terra);
+  opacity: 0;
+  transform: rotate(-90deg);
+  transition: opacity 0.4s, transform 0.6s var(--ease-expo);
+}
+.svPanelTOn .svTStar { opacity: 1; transform: rotate(0deg); }
+
+.svTBottom {
+  position: absolute;
+  left: clamp(1.2rem, 2vw, 1.8rem);
+  right: clamp(1.2rem, 2vw, 1.8rem);
+  bottom: clamp(1.2rem, 2.2vw, 1.8rem);
+}
+.svTKicker {
+  font-family: var(--f-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--terra);
+  margin-bottom: 0.5rem;
+}
+.svTTitle {
+  font-family: var(--f-display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(1.9rem, 3.4vw, 3rem);
+  line-height: 1;
+  color: var(--cream);
+  white-space: nowrap;
+}
+/* descripción + entrar: solo en el panel expandido */
+.svTDesc {
+  max-width: 42ch;
+  font-family: var(--f-display);
+  font-size: clamp(0.88rem, 1.2vw, 1rem);
+  line-height: 1.55;
+  color: rgba(240,234,216,0.78);
+  margin-top: 0.7rem;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.55s var(--ease-expo), opacity 0.45s 0.12s;
+}
+.svPanelTOn .svTDesc { max-height: 7em; opacity: 1; }
+.svTGo {
+  display: inline-block;
+  margin-top: 0.9rem;
+  font-family: var(--f-mono);
+  font-size: 0.58rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--cream);
-  background: none;
-  border: 1px solid rgba(240,234,216,0.35);
-  padding: 0.8rem 1.5rem;
-  cursor: pointer;
-  transition: background 0.3s, color 0.3s, border-color 0.3s;
+  border-bottom: 1px solid rgba(240,234,216,0.45);
+  padding-bottom: 0.2rem;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s 0.15s, transform 0.45s 0.15s var(--ease-expo);
 }
-.svPanelGo:hover { background: var(--cream); color: var(--burgundy); border-color: var(--cream); }
+.svPanelTOn .svTGo { opacity: 1; transform: translateY(0); }
 
 .outlineBtn {
   background: none;
@@ -904,9 +919,12 @@
   .decoNum, .decoNumLight { display: none; }
 
   .serviciosHead { flex-direction: column; align-items: flex-start; gap: 0.8rem; padding: 4rem 2rem 2rem; }
-  /* en touch: lista arriba, panel debajo */
-  .svLayout { grid-template-columns: 1fr; gap: 1.8rem; padding: 2rem 2rem 3.5rem; }
-  .svPanel { min-height: 0; padding: 1.8rem; }
+  /* en touch: láminas apiladas, descripción siempre visible */
+  .svTriptych { flex-direction: column; height: auto; padding: 2rem 2rem 3.5rem; }
+  .svPanelT, .svPanelTOn { flex: none; height: clamp(220px, 36vh, 320px); }
+  .svTDesc { max-height: 7em; opacity: 1; }
+  .svTGo { opacity: 1; transform: none; }
+  .svTStar { opacity: 1; transform: none; }
 
   .eventos { min-height: auto; }
   .eventosOverlay { padding: 4rem 2rem; }
@@ -947,8 +965,8 @@
 
   .agenciaStrip { grid-template-columns: repeat(2, 1fr); }
   .serviciosHead { padding: 3rem 1.5rem 1.8rem; }
-  .svLayout { padding: 1.6rem 1.5rem 3rem; }
-  .svTitle { font-size: clamp(1.5rem, 7.5vw, 2rem); }
+  .svTriptych { padding: 1.6rem 1.5rem 3rem; }
+  .svTDesc { display: none; }
   .agencia { padding: 4rem 1.5rem 3rem; }
   .quienesText { padding: 3rem 1.5rem; }
   .estudioPanel { padding: 3rem 1.5rem; }
