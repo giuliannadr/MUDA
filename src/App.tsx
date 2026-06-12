@@ -12,26 +12,26 @@ import Agencia from './components/Agencia'
 import Estudio from './components/Estudio'
 import Contacto from './components/Contacto'
 import Sumate from './components/Sumate'
+import { pathToView, viewToPath, applySeo } from './lib/seo'
 import './App.css'
 
 export type View = 'inicio' | 'quienes' | 'produccion' | 'foto-video' | 'direccion-creativa' | 'contenido-redes' | 'eventos' | 'agencia' | 'estudio' | 'contacto' | 'sumate'
 
 const ALL_VIEWS: View[] = ['inicio', 'quienes', 'produccion', 'foto-video', 'direccion-creativa', 'contenido-redes', 'eventos', 'agencia', 'estudio', 'contacto', 'sumate']
 
-// La sección viaja en history.state (URL limpia, sin #). Sobrevive recargas
-// y el botón atrás/adelante. Soporta links viejos con #seccion por compatibilidad.
-const readView = (st?: unknown): View => {
-  const s = (st ?? window.history.state) as { view?: View } | null
-  if (s?.view && ALL_VIEWS.includes(s.view)) return s.view
+// Cada sección tiene su URL real (/produccion, /estudio, …) para que Google
+// la indexe por separado. Soporta links viejos con #seccion por compatibilidad.
+const readView = (): View => {
   const h = window.location.hash.replace('#', '') as View
-  return ALL_VIEWS.includes(h) ? h : 'inicio'
+  if (ALL_VIEWS.includes(h)) return h
+  return pathToView(window.location.pathname)
 }
 
 export default function App() {
   const initial = readView()
-  // Si llegó con #seccion (link viejo), limpiar la URL conservando la sección
+  // Si llegó con #seccion (link viejo), redirigir a la URL real de esa sección
   if (window.location.hash) {
-    window.history.replaceState({ view: initial }, '', window.location.pathname + window.location.search)
+    window.history.replaceState({ view: initial }, '', viewToPath(initial) + window.location.search)
   }
   const [current, setCurrent] = useState<View>(initial)
   const [displayed, setDisplayed] = useState<View>(initial)
@@ -48,8 +48,8 @@ export default function App() {
       homeScroll.current = mainRef.current.scrollTop
     }
     setAnimating(true)
-    // Guardar la sección en el historial (URL limpia, sin #)
-    window.history.pushState({ view }, '', window.location.pathname + window.location.search)
+    // Navegar a la URL real de la sección (ej: /estudio)
+    window.history.pushState({ view }, '', viewToPath(view) + window.location.search)
     setTimeout(() => {
       setDisplayed(view)
       setCurrent(view)
@@ -71,8 +71,8 @@ export default function App() {
 
   // Botón atrás/adelante del navegador → cambiar de sección
   useEffect(() => {
-    const onPop = (e: PopStateEvent) => {
-      const v = readView(e.state)
+    const onPop = () => {
+      const v = readView()
       setCurrent(v)
       setDisplayed(v)
       requestAnimationFrame(() => mainRef.current?.scrollTo({ top: 0 }))
@@ -80,6 +80,9 @@ export default function App() {
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
+
+  // SEO: actualizar título, descripción y canonical según la sección activa
+  useEffect(() => { applySeo(current) }, [current])
 
   useEffect(() => {
     const timer = setTimeout(() => {
