@@ -391,17 +391,18 @@
 
 .serviciosHead {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 6rem 5rem 4rem;
-  border-bottom: 1px solid rgba(10,9,8,0.1);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.1rem;
+  padding: clamp(4rem, 7vw, 6.5rem) clamp(1.5rem, 5vw, 5rem) clamp(2rem, 3vw, 3rem);
 }
 
 .serviciosH {
   font-family: var(--f-display);
-  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-size: clamp(2.6rem, 5.5vw, 4.8rem);
   font-weight: 300;
-  line-height: 0.95;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
   color: var(--bg);
 }
 
